@@ -1,0 +1,59 @@
+<section class="about-hero">
+  <div class="container">
+    <h1>Plus qu'une location, une <span>expérience</span></h1>
+    <p>Depuis 2014, AutoDrive redéfinit les standards de la mobilité premium.</p>
+  </div>
+</section>
+
+<section class="about-content">
+  <div class="container grid">
+    <div class="text-block">
+      <h2>Notre Histoire</h2>
+      <p>
+        Fondée à Paris, <strong>AutoDrive</strong> est née d'une idée simple : rendre la location de voitures de prestige accessible, transparente et entièrement numérique.
+      </p>
+      <p>
+        Nous sélectionnons chaque véhicule selon des critères de sécurité et de confort stricts. Que ce soit pour un voyage d'affaires ou une escapade le week-end, nous garantissons un service irréprochable.
+      </p>
+    </div>
+    <div class="image-block">
+      <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?q=80&w=800" alt="Nos bureaux">
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      @for (stat of stats; track stat.label) {
+        <div class="stat-card">
+          <span class="stat-value">{{ stat.value }}</span>
+          <span class="stat-label">{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="values">
+  <div class="container">
+    <h2 class="section-title">Nos Valeurs Clés</h2>
+    <div class="values-grid">
+      <div class="value-item">
+        <div class="icon">🛡️</div>
+        <h3>Transparence</h3>
+        <p>Aucun frais caché. Le prix affiché est le prix que vous payez.</p>
+      </div>
+      <div class="value-item">
+        <div class="icon">🌿</div>
+        <h3>Éco-responsabilité</h3>
+        <p>Une flotte composée à 40% de véhicules hybrides et électriques.</p>
+      </div>
+      <div class="value-item">
+        <div class="icon">📞</div>
+        <h3>Support 24/7</h3>
+        <p>Une assistance routière disponible à tout moment, où que vous soyez.</p>
+      </div>
+    </div>
+  </div>
+</section>

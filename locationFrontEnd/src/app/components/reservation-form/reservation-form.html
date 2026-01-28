@@ -1,0 +1,53 @@
+<div class="reservation-container">
+  <div class="reservation-card">
+    <h2>Réserver votre <span>Véhicule</span></h2>
+    <p>Remplissez les informations ci-dessous pour finaliser votre location.</p>
+
+    @if (successMessage) {
+    <div class="alert-success">
+      ✅ {{ successMessage }}
+    </div>
+    }
+
+    <form [formGroup]="reservationForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Véhicule souhaité</label>
+        <select formControlName="carId">
+          <option value="">Choisissez une voiture</option>
+
+          @for (car of cars(); track car.id) {
+          @if (car.disponible) {
+          <option [value]="car.id">
+            {{ car.marque }} {{ car.modele }} ({{ car.prixJournalier }}€/j)
+          </option>
+          }
+          }
+        </select>
+
+        @if (reservationForm.get('carId')?.touched && reservationForm.get('carId')?.invalid) {
+        <small class="error">Veuillez choisir un véhicule.</small>
+        }
+      </div>
+
+      <div class="date-group">
+        <div class="form-group">
+          <label>Date de début</label>
+          <input type="date" formControlName="dateDebut">
+        </div>
+
+        <div class="form-group">
+          <label>Date de fin</label>
+          <input type="date" formControlName="dateFin">
+        </div>
+      </div>
+
+      <div class="info-box">
+        <p>⚠️ L'assurance est incluse par défaut dans votre réservation.</p>
+      </div>
+
+      <button type="submit" [disabled]="reservationForm.invalid || isSubmitting" class="btn-confirm">
+        {{ isSubmitting ? 'Traitement...' : 'Confirmer la réservation' }}
+      </button>
+    </form>
+  </div>
+</div>

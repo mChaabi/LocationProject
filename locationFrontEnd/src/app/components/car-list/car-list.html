@@ -1,0 +1,53 @@
+<div class="car-explorer">
+  <div class="container">
+    <header class="list-header">
+      <h1>Notre Flotte <span>Premium</span></h1>
+      <p>Sélectionnez le véhicule idéal pour votre prochain trajet.</p>
+    </header>
+
+    <div class="car-grid">
+      @for (car of cars(); track car.id) {
+        <div class="car-card" [class.rented]="!car.disponible">
+          <div class="car-image-box">
+            <img [src]="car.imageUrL" [alt]="car.modele" class="car-img">
+            @if (!car.disponible) {
+              <div class="overlay-status">Indisponible</div>
+            }
+          </div>
+
+          <div class="car-details">
+            <div class="brand-row">
+              <img [src]="car.imageUrL" [alt]="car.modele" class="car-img">
+              <div>
+                <span class="brand-name">{{ car.marque }}</span>
+                <h3 class="model-name">{{ car.modele }}</h3>
+              </div>
+            </div>
+
+            <div class="specs-grid">
+              <div class="spec-item">⚙️ {{ car.typeBoite }}</div>
+              <div class="spec-item">🎨 {{ car.couleur }}</div>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-tag">
+                <span class="price">{{ car.prixJournalier }}€</span>
+                <span class="unit">/jour</span>
+              </div>
+              <button
+                class="btn-action"
+                [disabled]="!car.disponible"
+                (click)="reserverVoiture(car)">
+                {{ car.disponible ? 'Réserver' : 'Indisponible' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <p>Aucune voiture n'est disponible pour le moment.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

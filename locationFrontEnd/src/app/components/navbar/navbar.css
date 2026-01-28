@@ -1,0 +1,135 @@
+:host {
+  --primary-color: #3498db;
+  --dark-color: #1a1a1a;
+  --text-light: #ffffff;
+  --transition: all 0.3s ease;
+}
+
+.navbar {
+  background-color: var(--dark-color);
+  padding: 0.8rem 2rem;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo a {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-light);
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.logo span { color: var(--primary-color); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  position: relative;
+  padding: 5px 0;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--primary-color);
+}
+
+/* Soulignement animé pour les liens actifs */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background-color: var(--primary-color);
+  transition: var(--transition);
+}
+
+.nav-links a.active::after, .nav-links a:hover::after {
+  width: 100%;
+}
+
+/* Boutons spéciaux */
+.btn-auth {
+  background: var(--primary-color);
+  color: white !important;
+  padding: 10px 22px !important;
+  border-radius: 50px;
+  font-weight: 600 !important;
+}
+
+.btn-auth:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1.5px solid #e74c3c;
+  color: #e74c3c;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Burger Menu Mobile */
+.burger {
+  display: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.burger span {
+  width: 25px; height: 3px;
+  background: white;
+  transition: var(--transition);
+}
+
+@media (max-width: 992px) {
+  .burger { display: flex; }
+
+  .nav-links {
+    position: absolute;
+    top: 100%; left: 0;
+    width: 100%;
+    flex-direction: column;
+    background: var(--dark-color);
+    padding: 2rem;
+    gap: 2rem;
+    transform: translateY(-150%);
+    transition: var(--transition);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .nav-links.active { transform: translateY(0); }
+}

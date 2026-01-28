@@ -1,0 +1,65 @@
+<section class="contact-page">
+  <div class="container">
+    <div class="contact-wrapper">
+
+      <div class="contact-info">
+        <h2>Contactez-<span>nous</span></h2>
+        <p>Une question ? Notre équipe vous répond sous 24h.</p>
+
+        <div class="info-item">
+          <span class="icon">📍</span>
+          <div>
+            <h4>Adresse</h4>
+            <p>123 Avenue des Champs-Élysées, Paris</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon">📞</span>
+          <div>
+            <h4>Téléphone</h4>
+            <p>+33 1 23 45 67 89</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form-container">
+        @if (successMessage) {
+          <div class="alert-success">{{ successMessage }}</div>
+        }
+
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>Nom complet</label>
+            <input type="text" formControlName="nomComplet" placeholder="Votre nom">
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="votre@email.com">
+          </div>
+
+          <div class="form-group">
+            <label>Sujet</label>
+            <select formControlName="sujet">
+              <option value="">Sélectionnez un sujet</option>
+              <option value="Location">Question sur une location</option>
+              <option value="Tarifs">Informations tarifs</option>
+              <option value="Autre">Autre demande</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Message</label>
+            <textarea formControlName="message" rows="5" placeholder="Comment pouvons-nous vous aider ?"></textarea>
+          </div>
+
+          <button type="submit" [disabled]="contactForm.invalid || isSubmitting" class="btn-submit">
+            {{ isSubmitting ? 'Envoi en cours...' : 'Envoyer le message' }}
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
