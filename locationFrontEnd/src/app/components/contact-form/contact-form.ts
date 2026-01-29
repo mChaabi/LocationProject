@@ -34,7 +34,7 @@ export class ContactComponent {
         dateEnvoi: new Date()
       };
 
-      this.contactService.sendMessage(formData).subscribe({
+      this.contactService.sendContact(formData).subscribe({
         next: () => {
           this.successMessage = 'Votre message a été envoyé avec succès !';
           this.contactForm.reset();

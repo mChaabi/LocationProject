@@ -33,7 +33,7 @@ export class ReservationComponent implements OnInit {
 
   initForm() {
     this.reservationForm = this.fb.group({
-      carId: ['', Validators.required], // À récupérer via l'URL ou un état
+      carId: ['', Validators.required],
       dateDebut: ['', Validators.required],
       dateFin: ['', Validators.required]
     });
@@ -45,9 +45,9 @@ export class ReservationComponent implements OnInit {
 
       const newReservation: Reservation = {
         ...this.reservationForm.value,
-        userId: this.authService.currentUser()?.id, // Récupère l'ID de l'utilisateur connecté
+        userId: this.authService.currentUser()?.id,
         statut: 'en_attente',
-        prixTotal: 0 // À calculer selon la durée et le prix de la voiture
+        prixTotal: 0
       };
 
       this.reservationService.createReservation(newReservation).subscribe({

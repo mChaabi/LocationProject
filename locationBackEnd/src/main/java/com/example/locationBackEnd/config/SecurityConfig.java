@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -17,17 +18,30 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(withDefaults()) // Active la configuration CORS (ton WebConfig)
+                .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // Utilise "/**" pour autoriser absolument TOUT sans restriction pour l'instant
-                        // Ou sois très spécifique si tu gardes le préfixe
+                        // Autoriser l'accès aux voitures (lecture/recherche)
                         .requestMatchers("/cars/**").permitAll()
-                        .requestMatchers("/api/cars/**").permitAll() // Ajoute cette ligne par sécurité
-                        .requestMatchers("/users/**").permitAll()
-                        .anyRequest().permitAll() // CHANGE TEMPORAIREMENT ICI pour tester
+
+                        // Autoriser l'envoi de messages de contact
+                        .requestMatchers("/contacts/**").permitAll()
+
+                        // Autoriser l'inscription et la connexion
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // Autoriser les réservations (pour l'instant ouvert pour tes tests)
+                        .requestMatchers("/reservations/**").permitAll()
+
+                        // Garder ceci pour autoriser tout le reste durant le développement
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults());
 
         return http.build();
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
