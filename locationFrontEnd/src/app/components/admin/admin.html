@@ -1,0 +1,128 @@
+<div class="admin">
+  <aside>
+    <h3>Espace <em>Agence</em></h3>
+    <button [class.on]="tab() === 'dashboard'" (click)="tab.set('dashboard')">
+      📊 Tableau de bord
+    </button>
+    <button [class.on]="tab() === 'cars'" (click)="tab.set('cars')">🚗 Voitures</button>
+    <button [class.on]="tab() === 'reservations'" (click)="tab.set('reservations')">
+      📅 Réservations
+    </button>
+    <button [class.on]="tab() === 'options'" (click)="tab.set('options')">➕ Options</button>
+  </aside>
+
+  <main>
+    @switch (tab()) {
+      @case ('dashboard') {
+        <div class="stats">
+          @for (s of stats(); track s.label; let i = $index) {
+            <div class="stat" [style.--i]="i">
+              <span class="ico">{{ s.icon }}</span
+              ><b>{{ s.value }}</b
+              ><small>{{ s.label }}</small>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('cars') {
+        <div class="bar">
+          <h2>Voitures</h2>
+          <button class="btn" (click)="openForm()">+ Ajouter</button>
+        </div>
+        <div class="table">
+          @for (c of cars(); track c.id; let i = $index) {
+            <div class="row" [style.--i]="i">
+              <img
+                [src]="
+                  c.imageUrL ||
+                  'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+                "
+                alt=""
+              />
+              <div class="grow">
+                <b>{{ c.marque }} {{ c.modele }}</b
+                ><small>{{ c.typeBoite }} · {{ c.annee }}</small>
+              </div>
+              <b>{{ c.prixJournalier }}€</b>
+              <button class="pill" [class.ok]="c.disponible" (click)="toggle(c)">
+                {{ c.disponible ? 'Disponible' : 'Indisponible' }}
+              </button>
+              <button class="ghost" (click)="openForm(c)">✏️</button>
+              <button class="ghost red" (click)="remove(c)">🗑️</button>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('reservations') {
+        <div class="bar"><h2>Réservations</h2></div>
+        <div class="table">
+          @for (r of reservations(); track r.id; let i = $index) {
+            <div class="row" [style.--i]="i">
+              <div class="grow">
+                <b>{{ r.carName }}</b
+                ><small>{{ r.dateDebut }} → {{ r.dateFin }}</small>
+              </div>
+              <b>{{ r.prixTotal }}€</b>
+              <span class="pill" [class]="'pill ' + r.statut">{{
+                r.statut.replace('_', ' ')
+              }}</span>
+              @if (r.statut === 'en_attente') {
+                <button class="ghost" (click)="setStatus(r, 'confirmee')">✅</button>
+              }
+              @if (r.statut !== 'annulee') {
+                <button class="ghost red" (click)="setStatus(r, 'annulee')">✖</button>
+              }
+            </div>
+          } @empty {
+            <p class="empty">Aucune réservation.</p>
+          }
+        </div>
+      }
+      @case ('options') {
+        <div class="bar"><h2>Options</h2></div>
+        <form class="optform" [formGroup]="optForm" (ngSubmit)="addOption()">
+          <input formControlName="icon" placeholder="🙂" />
+          <input formControlName="name" placeholder="Nom de l'option" />
+          <input type="number" formControlName="price" placeholder="€ / jour" />
+          <button class="btn" [disabled]="optForm.invalid">+ Ajouter</button>
+        </form>
+        <div class="table">
+          @for (o of options(); track o.id; let i = $index) {
+            <div class="row" [style.--i]="i">
+              <span class="ico">{{ o.icon }}</span>
+              <div class="grow">
+                <b>{{ o.name }}</b>
+              </div>
+              <b>{{ o.price }}€ /j</b>
+              <button class="ghost red" (click)="removeOption(o)">🗑️</button>
+            </div>
+          }
+        </div>
+      }
+    }
+  </main>
+</div>
+
+@if (showForm()) {
+  <div class="overlay" (click)="showForm.set(false)">
+    <form class="modal" [formGroup]="form" (ngSubmit)="save()" (click)="$event.stopPropagation()">
+      <h2>{{ editingId() ? 'Modifier' : 'Ajouter' }} une voiture</h2>
+      <div class="two">
+        <input formControlName="marque" placeholder="Marque" />
+        <input formControlName="modele" placeholder="Modèle" />
+        <select formControlName="typeBoite">
+          <option value="automatique">Automatique</option>
+          <option value="manuelle">Manuelle</option>
+        </select>
+        <input formControlName="couleur" placeholder="Couleur" />
+        <input type="number" formControlName="annee" placeholder="Année" />
+        <input type="number" formControlName="prixJournalier" placeholder="Prix / jour" />
+      </div>
+      <input formControlName="imageUrL" placeholder="URL de l'image" />
+      <label class="chk"><input type="checkbox" formControlName="disponible" /> Disponible</label>
+      <button class="btn" [disabled]="form.invalid">Enregistrer</button>
+    </form>
+  </div>
+}

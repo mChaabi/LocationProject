@@ -1,15 +1,16 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CarService } from '../../services/car-service';
 import { Car } from '../../models/car';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { RevealDirective } from '../../shared/reveal';
 
 @Component({
   selector: 'app-car-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './car-list.html',
-  styleUrl: './car-list.css'
+  styleUrl: './car-list.css',
 })
 export class CarListComponent implements OnInit {
   // Injection du service
@@ -19,6 +20,16 @@ export class CarListComponent implements OnInit {
 
   // Utilisation du signal du service
   cars = this.carService.cars;
+  loaded = this.carService.loaded;
+  search = signal('');
+  gearbox = signal('all');
+  filtered = computed(() =>
+    this.cars().filter(
+      (c) =>
+        (this.gearbox() === 'all' || c.typeBoite === this.gearbox()) &&
+        `${c.marque} ${c.modele}`.toLowerCase().includes(this.search().toLowerCase()),
+    ),
+  );
 
   ngOnInit(): void {
     // On déclenche le chargement des données au démarrage
@@ -26,8 +37,6 @@ export class CarListComponent implements OnInit {
   }
 
   reserverVoiture(car: Car) {
-    console.log('Réservation pour :', car.marque, car.modele);
-    this.router.navigate(['/reservation']);
-    // Ici, tu pourras rediriger vers la page de réservation avec l'ID
+    this.router.navigate(['/reservations'], { queryParams: { carId: car.id } });
   }
 }

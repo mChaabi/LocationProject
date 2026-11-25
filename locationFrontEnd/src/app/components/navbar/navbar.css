@@ -133,3 +133,8 @@
 
   .nav-links.active { transform: translateY(0); }
 }
+
+:host { --primary-color:#818cf8; }
+.navbar { background:rgba(11,18,32,.82); backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.08); box-shadow:none; }
+.btn-auth { background:linear-gradient(135deg,#4f46e5,#7c3aed); }
