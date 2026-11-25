@@ -1,0 +1,70 @@
+@if (car(); as c) {
+  <section class="detail">
+    <a routerLink="/cars" class="back">← Retour aux voitures</a>
+
+    <div class="layout">
+      <div class="left">
+        <div class="photo"><img [src]="c.imageUrL" [alt]="c.modele" /></div>
+        <small>{{ c.marque }}</small>
+        <h1>{{ c.modele }}</h1>
+
+        <div class="specs">
+          <div>
+            <span>⚙️</span><b>{{ c.typeBoite }}</b
+            ><i>Boîte</i>
+          </div>
+          <div>
+            <span>🎨</span><b>{{ c.couleur }}</b
+            ><i>Couleur</i>
+          </div>
+          <div>
+            <span>📅</span><b>{{ c.annee }}</b
+            ><i>Année</i>
+          </div>
+          <div><span>🛡️</span><b>Incluse</b><i>Assurance</i></div>
+        </div>
+
+        <h3>Options supplémentaires</h3>
+        <div class="opts">
+          @for (o of options(); track o.id) {
+            <label class="opt" [class.on]="extras().includes(o.id)">
+              <input type="checkbox" (change)="toggle(o.id)" />
+              <span>{{ o.icon }} {{ o.name }}</span
+              ><b>+{{ o.price }}€/j</b>
+            </label>
+          }
+        </div>
+      </div>
+
+      <aside class="book">
+        <div class="price">{{ c.prixJournalier }}€ <i>/jour</i></div>
+        @if (done()) {
+          <div class="success">✅ Réservation envoyée ! Total : {{ total() }}€</div>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <label>Date de début<input type="date" formControlName="dateDebut" /></label>
+            <label>Date de fin<input type="date" formControlName="dateFin" /></label>
+
+            <ul class="sum">
+              <li>
+                <span>{{ days() }} jour(s) × {{ perDay() }}€</span><b>{{ total() }}€</b>
+              </li>
+            </ul>
+            @if (error()) {
+              <p class="err">{{ error() }}</p>
+            }
+
+            <button
+              class="btn"
+              [disabled]="form.invalid || days() < 1 || !c.disponible || sending()"
+            >
+              {{ c.disponible ? (sending() ? 'Envoi…' : 'Réserver maintenant') : 'Indisponible' }}
+            </button>
+          </form>
+        }
+      </aside>
+    </div>
+  </section>
+} @else {
+  <p class="loading">Chargement…</p>
+}

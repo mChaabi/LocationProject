@@ -1,53 +1,40 @@
-<div class="car-explorer">
-  <div class="container">
-    <header class="list-header">
-      <h1>Notre Flotte <span>Premium</span></h1>
-      <p>Sélectionnez le véhicule idéal pour votre prochain trajet.</p>
-    </header>
+<section class="page">
+  <header class="head">
+    <h1>Choisissez votre <em>voiture</em></h1>
+    <p>Passez la souris sur une carte, puis cliquez pour choisir.</p>
+  </header>
 
-    <div class="car-grid">
-      @for (car of cars(); track car.id) {
-        <div class="car-card" [class.rented]="!car.disponible">
-          <div class="car-image-box">
-            <img [src]="car.imageUrL" [alt]="car.modele" class="car-img">
-            @if (!car.disponible) {
-              <div class="overlay-status">Indisponible</div>
-            }
-          </div>
-
-          <div class="car-details">
-            <div class="brand-row">
-              <img [src]="car.imageUrL" [alt]="car.modele" class="car-img">
-              <div>
-                <span class="brand-name">{{ car.marque }}</span>
-                <h3 class="model-name">{{ car.modele }}</h3>
-              </div>
-            </div>
-
-            <div class="specs-grid">
-              <div class="spec-item">⚙️ {{ car.typeBoite }}</div>
-              <div class="spec-item">🎨 {{ car.couleur }}</div>
-            </div>
-
-            <div class="card-footer">
-              <div class="price-tag">
-                <span class="price">{{ car.prixJournalier }}€</span>
-                <span class="unit">/jour</span>
-              </div>
-              <button
-                class="btn-action"
-                [disabled]="!car.disponible"
-                (click)="reserverVoiture(car)">
-                {{ car.disponible ? 'Réserver' : 'Indisponible' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      } @empty {
-        <div class="empty-state">
-          <p>Aucune voiture n'est disponible pour le moment.</p>
-        </div>
-      }
-    </div>
+  <div class="toolbar">
+    <input placeholder="🔍 Rechercher une voiture…" (input)="search.set($any($event.target).value)">
+    @for (g of ['all', 'automatique', 'manuelle']; track g) {
+      <button [class.on]="gearbox() === g" (click)="gearbox.set(g)">{{ g === 'all' ? 'Toutes' : g }}</button>
+    }
   </div>
-</div>
+
+  <div class="grid">
+    @if (!loaded()) { @for (n of [1,2,3]; track n) { <div class="skeleton"></div> } }
+
+    @for (car of filtered(); track car.id; let i = $index) {
+      <a class="card" appReveal [style.--i]="i" [routerLink]="['/cars', car.id]" [class.off]="!car.disponible">
+        <div class="media">
+          <div class="ph">{{ car.marque.charAt(0) }}</div>
+          @if (car.imageUrL) {
+            <img [src]="car.imageUrL" [alt]="car.modele" loading="lazy" (error)="$any($event.target).remove()">
+          }
+          <span class="badge" [class.ok]="car.disponible">{{ car.disponible ? 'Disponible' : 'Indisponible' }}</span>
+          <div class="hover">
+            <span class="cta">{{ car.disponible ? 'Choisir cette voiture →' : 'Voir les détails →' }}</span>
+          </div>
+        </div>
+        <div class="body">
+          <small>{{ car.marque }}</small>
+          <h3>{{ car.modele }}</h3>
+          <div class="chips"><span>⚙️ {{ car.typeBoite }}</span><span>🎨 {{ car.couleur }}</span><span>📅 {{ car.annee }}</span></div>
+          <div class="foot"><strong>{{ car.prixJournalier }}€ <i>/jour</i></strong><span class="go">Détails →</span></div>
+        </div>
+      </a>
+    } @empty {
+      @if (loaded()) { <p class="empty">Aucune voiture trouvée.</p> }
+    }
+  </div>
+</section>

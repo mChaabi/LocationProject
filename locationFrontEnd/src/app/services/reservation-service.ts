@@ -21,4 +21,11 @@ export class ReservationService {
   deleteReservation(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getAll() {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+  setStatus(id: number, value: string) {
+    return this.http.put(`${this.apiUrl}/${id}/status`, null, { params: { value } });
+  }
 }

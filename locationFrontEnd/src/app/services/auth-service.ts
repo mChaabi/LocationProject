@@ -1,18 +1,23 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { tap } from 'rxjs';
 import { User } from '../models/user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  currentUser = signal<User | null>(null);
+  private api = 'http://localhost:8080/api';
 
-  register(userData: Partial<User>) {
-    return this.http.post<User>('https://api.monsite.com/register', userData);
-  }
+  currentUser = signal<User | null>(this.restore());
+  isAdmin = computed(() => this.currentUser()?.role === 'admin');
 
-  // Bonus : Simulation de déconnexion
-  logout() {
-    this.currentUser.set(null);
+  private restore(): User | null {
+    try { return JSON.parse(localStorage.getItem('user') ?? 'null'); } catch { return null; }
   }
+  register(data: Partial<User>) { return this.http.post<User>(`${this.api}/users/register`, data); }
+  login(email: string, password: string) {
+    return this.http.post<User>(`${this.api}/auth/login`, { email, password }).pipe(
+      tap(u => { this.currentUser.set(u); localStorage.setItem('user', JSON.stringify(u)); }));
+  }
+  logout() { this.currentUser.set(null); localStorage.removeItem('user'); }
 }

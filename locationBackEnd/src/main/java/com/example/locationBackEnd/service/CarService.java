@@ -4,6 +4,7 @@ import com.example.locationBackEnd.dto.CarDTO;
 import com.example.locationBackEnd.entity.Car;
 import com.example.locationBackEnd.mapper.CarMapper;
 import com.example.locationBackEnd.repository.CarRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,13 @@ public class CarService {
         Car car = carMapper.toEntity(carDTO);
         Car savedCar = carRepository.save(car);
         return carMapper.toDTO(savedCar);
+    }
+
+    public CarDTO update(String id, CarDTO dto) {
+        if (!carRepository.existsById(id)) throw new EntityNotFoundException("Voiture introuvable");
+        Car car = carMapper.toEntity(dto);
+        car.setId(id);
+        return carMapper.toDTO(carRepository.save(car));
     }
 
     // 3. Supprimer une voiture

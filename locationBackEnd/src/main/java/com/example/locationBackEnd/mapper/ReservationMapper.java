@@ -31,7 +31,8 @@ public class ReservationMapper {
                 entity.getDateDebut(),
                 entity.getDateFin(),
                 entity.getPrixTotal(),
-                entity.getStatut()
+                entity.getStatut(),
+                entity.getExtras()
         );
     }
 }
