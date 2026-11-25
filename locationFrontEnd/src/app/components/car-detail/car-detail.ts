@@ -32,15 +32,26 @@ export class CarDetailComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
-  private id = inject(ActivatedRoute).snapshot.paramMap.get('id');
+
+  private route = inject(ActivatedRoute);
+  private id = this.route.snapshot.paramMap.get('id');
 
   private optService = inject(OptionService);
-options = this.optService.options;
-extras = signal<number[]>([]);
+  options = this.optService.options;
+  extras = signal<number[]>([]);
 
-perDay = computed(() => (this.car()?.prixJournalier ?? 0) +
-  this.options().filter(o => this.extras().includes(o.id)).reduce((s, o) => s + o.price, 0));
+  form = this.fb.nonNullable.group({
+    dateDebut: [this.route.snapshot.queryParamMap.get('debut') ?? '', Validators.required],
+    dateFin: [this.route.snapshot.queryParamMap.get('fin') ?? '', Validators.required],
+  });
 
+  perDay = computed(
+    () =>
+      (this.car()?.prixJournalier ?? 0) +
+      this.options()
+        .filter((o) => this.extras().includes(o.id))
+        .reduce((s, o) => s + o.price, 0),
+  );
 
   sending = signal(false);
   done = signal(false);
@@ -52,11 +63,6 @@ perDay = computed(() => (this.car()?.prixJournalier ?? 0) +
     }
     const carsList = (this.carService.cars() as CarItem[]) ?? [];
     return carsList.find((c: CarItem) => String(c.id) === this.id);
-  });
-
-  form = this.fb.nonNullable.group({
-    dateDebut: ['', Validators.required],
-    dateFin: ['', Validators.required],
   });
 
   private dates = toSignal(this.form.valueChanges, {
@@ -71,13 +77,15 @@ perDay = computed(() => (this.car()?.prixJournalier ?? 0) +
     return Math.max(0, Math.round((+new Date(dateFin) - +new Date(dateDebut)) / 864e5));
   });
 
-
   total = computed(() => this.days() * this.perDay());
 
-
-  ngOnInit() { if (!this.carService.cars().length) this.carService.getAllCars(); this.optService.load(); }
-toggle(id: number) { this.extras.update(l => l.includes(id) ? l.filter(k => k !== id) : [...l, id]); }
-
+  ngOnInit() {
+    if (!this.carService.cars().length) this.carService.getAllCars();
+    this.optService.load();
+  }
+  toggle(id: number) {
+    this.extras.update((l) => (l.includes(id) ? l.filter((k) => k !== id) : [...l, id]));
+  }
 
   submit(): void {
     this.sending.set(true);
@@ -97,9 +105,7 @@ toggle(id: number) { this.extras.update(l => l.includes(id) ? l.filter(k => k !=
           this.sending.set(false);
         },
         error: (err) => {
-          this.error.set(
-            typeof err?.error === 'string' ? err.error : 'Erreur, réessayez.'
-          );
+          this.error.set(typeof err?.error === 'string' ? err.error : 'Erreur, réessayez.');
           this.sending.set(false);
         },
       });

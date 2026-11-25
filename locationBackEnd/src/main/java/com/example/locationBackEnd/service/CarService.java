@@ -4,11 +4,13 @@ import com.example.locationBackEnd.dto.CarDTO;
 import com.example.locationBackEnd.entity.Car;
 import com.example.locationBackEnd.mapper.CarMapper;
 import com.example.locationBackEnd.repository.CarRepository;
+import com.example.locationBackEnd.repository.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ public class CarService {
 
     private final CarRepository carRepository;
     private final CarMapper carMapper;
+    private final ReservationRepository reservationRepository;
 
     // 1. Trouver toutes les voitures
     public List<CarDTO> findAll() {
@@ -25,6 +28,13 @@ public class CarService {
                 .stream()
                 .map(carMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<CarDTO> findAvailable(LocalDate debut, LocalDate fin) {
+        return carRepository.findByDisponibleTrue().stream()
+                .filter(c -> !reservationRepository.existsOverlap(c.getId(), debut, fin))
+                .map(carMapper::toDTO)
+                .toList();
     }
 
     // 2. Créer une seule voiture

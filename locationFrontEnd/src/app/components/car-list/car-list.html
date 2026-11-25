@@ -4,6 +4,11 @@
     <p>Passez la souris sur une carte, puis cliquez pour choisir.</p>
   </header>
 
+  @if (range(); as r) {
+    <div class="range">📅 Voitures libres du <b>{{ r.debut }}</b> au <b>{{ r.fin }}</b>
+      <a routerLink="/cars">Effacer</a></div>
+  }
+
   <div class="toolbar">
     <input placeholder="🔍 Rechercher une voiture…" (input)="search.set($any($event.target).value)">
     @for (g of ['all', 'automatique', 'manuelle']; track g) {
@@ -12,29 +17,14 @@
   </div>
 
   <div class="grid">
-    @if (!loaded()) { @for (n of [1,2,3]; track n) { <div class="skeleton"></div> } }
-
-    @for (car of filtered(); track car.id; let i = $index) {
-      <a class="card" appReveal [style.--i]="i" [routerLink]="['/cars', car.id]" [class.off]="!car.disponible">
-        <div class="media">
-          <div class="ph">{{ car.marque.charAt(0) }}</div>
-          @if (car.imageUrL) {
-            <img [src]="car.imageUrL" [alt]="car.modele" loading="lazy" (error)="$any($event.target).remove()">
-          }
-          <span class="badge" [class.ok]="car.disponible">{{ car.disponible ? 'Disponible' : 'Indisponible' }}</span>
-          <div class="hover">
-            <span class="cta">{{ car.disponible ? 'Choisir cette voiture →' : 'Voir les détails →' }}</span>
-          </div>
-        </div>
-        <div class="body">
-          <small>{{ car.marque }}</small>
-          <h3>{{ car.modele }}</h3>
-          <div class="chips"><span>⚙️ {{ car.typeBoite }}</span><span>🎨 {{ car.couleur }}</span><span>📅 {{ car.annee }}</span></div>
-          <div class="foot"><strong>{{ car.prixJournalier }}€ <i>/jour</i></strong><span class="go">Détails →</span></div>
-        </div>
-      </a>
-    } @empty {
-      @if (loaded()) { <p class="empty">Aucune voiture trouvée.</p> }
+    @if (!ready()) {
+      @for (n of [1, 2, 3]; track n) { <div class="skeleton"></div> }
+    } @else {
+      @for (car of filtered(); track car.id; let i = $index) {
+        <app-car-card appReveal [style.--i]="i" [car]="car" [dates]="range()" />
+      } @empty {
+        <p class="empty">{{ range() ? 'Aucune voiture libre pour ces dates. Essayez d’autres dates.' : 'Aucune voiture trouvée.' }}</p>
+      }
     }
   </div>
 </section>

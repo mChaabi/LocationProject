@@ -22,5 +22,8 @@ export class CarService {
 create(car: object) { return this.http.post(`${this.apiUrl}/add`, car).pipe(tap(() => this.getAllCars())); }
 update(id: string, car: object) { return this.http.put(`${this.apiUrl}/${id}`, car).pipe(tap(() => this.getAllCars())); }
 remove(id: string) { return this.http.delete(`${this.apiUrl}/delete/${id}`).pipe(tap(() => this.getAllCars())); }
+getAvailable(debut: string, fin: string) {
+  return this.http.get<Car[]>(`${this.apiUrl}/available`, { params: { debut, fin } });
+}
 
 }

@@ -1,36 +1,101 @@
-<section class="hero-section">
-  <div class="hero-container">
-    <div class="hero-text">
-      <span class="badge">Nouveauté 2026</span>
-      <h1>La liberté de rouler avec <span>AutoDrive</span></h1>
-      <p>Réservez des véhicules d'exception en quelques clics. Simple, rapide et sans frais cachés.</p>
-
-      <div class="cta-group">
-        <a routerLink="/cars" class="btn-primary">Voir le catalogue</a>
-        <button (click)="scrollToExplore()" class="btn-secondary">Découvrir plus</button>
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="container hero-grid">
+    <div class="copy">
+      <span class="pill">✨ Location de voitures premium</span>
+      <h1>
+        <span class="line"><span>Louez la voiture</span></span>
+        <span class="line"><span>parfaite en <em>2 minutes</em></span></span>
+      </h1>
+      <p>Choisissez vos dates, découvrez uniquement les voitures disponibles et réservez en quelques clics.</p>
+      <div class="cta">
+        <a routerLink="/cars" class="btn">Voir toutes les voitures</a>
+        <button class="ghost-btn" (click)="scrollTo('how')">Comment ça marche</button>
       </div>
     </div>
-
-    <div class="hero-image">
-      <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000" alt="Car showcase">
+    <div class="visual">
+      <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000" alt="Voiture">
+      <div class="float f1">🛡️ Assurance incluse</div>
+      <div class="float f2">⚡ Réservation en 2 min</div>
     </div>
   </div>
 </section>
 
-<section class="features">
-  <div class="feature-card">
-    <div class="icon">✨</div>
-    <h3>Qualité Premium</h3>
-    <p>Des véhicules récents et entretenus avec soin.</p>
+<!-- AVAILABILITY SEARCH -->
+<div class="container search-wrap">
+  <div class="search">
+    <label>Date de départ
+      <input type="date" [min]="today" (change)="debut.set($any($event.target).value)">
+    </label>
+    <label>Date de retour
+      <input type="date" [min]="debut() || today" (change)="fin.set($any($event.target).value)">
+    </label>
+    <button class="btn" [disabled]="!valid()" (click)="search()">Voir les voitures disponibles</button>
+    @if (debut() && fin() && !valid()) { <small class="warn">La date de retour doit être après le départ.</small> }
   </div>
-  <div class="feature-card">
-    <div class="icon">🛡️</div>
-    <h3>Sécurité Totale</h3>
-    <p>Assurance complète incluse pour chaque trajet.</p>
+</div>
+
+<!-- STATS -->
+@if (loaded()) {
+  <section class="container stats">
+    @for (s of stats(); track s.label; let i = $index) {
+      <div class="stat" appReveal [style.--i]="i">
+        <b [appCounter]="s.value" [suffix]="s.suffix"></b><span>{{ s.label }}</span>
+      </div>
+    }
+  </section>
+}
+
+<!-- HOW IT WORKS -->
+<section id="how" class="section container center">
+  <span class="kicker">Simple et rapide</span>
+  <h2 class="title">Comment <em>ça marche</em></h2>
+  <p class="lead">Quatre étapes, aucune surprise.</p>
+  <div class="grid4">
+    @for (s of steps; track s.title; let i = $index) {
+      <div class="step" appReveal [style.--i]="i">
+        <span class="num">{{ i + 1 }}</span><div class="ico">{{ s.icon }}</div>
+        <h3>{{ s.title }}</h3><p>{{ s.text }}</p>
+      </div>
+    }
   </div>
-  <div class="feature-card">
-    <div class="icon">📱</div>
-    <h3>Réservation Facile</h3>
-    <p>Gérez vos locations depuis votre smartphone.</p>
+</section>
+
+<!-- FEATURED CARS -->
+@if (featured().length) {
+  <section class="section soft">
+    <div class="container center">
+      <span class="kicker">Notre flotte</span>
+      <h2 class="title">Voitures <em>à la une</em></h2>
+      <div class="featured">
+        @for (c of featured(); track c.id; let i = $index) {
+          <app-car-card appReveal [style.--i]="i" [car]="c" />
+        }
+      </div>
+      <a routerLink="/cars" class="btn more">Voir tout le catalogue</a>
+    </div>
+  </section>
+}
+
+<!-- PERKS -->
+<section class="section container center">
+  <span class="kicker">Pourquoi nous</span>
+  <h2 class="title">Une agence <em>sans friction</em></h2>
+  <div class="grid4">
+    @for (p of perks; track p.title; let i = $index) {
+      <div class="perk" appReveal [style.--i]="i">
+        <div class="ico">{{ p.icon }}</div><h3>{{ p.title }}</h3><p>{{ p.text }}</p>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="container">
+  <div class="banner" appReveal>
+    <h2>Prêt à prendre la route ?</h2>
+    <p>Créez votre compte et réservez votre prochaine voiture en 2 minutes.</p>
+    <a routerLink="/register" class="white-btn">Créer mon compte</a>
   </div>
 </section>

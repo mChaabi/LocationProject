@@ -1,42 +1,43 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CarService } from '../../services/car-service';
-import { Car } from '../../models/car';
-import { Router, RouterLink } from '@angular/router';
 import { RevealDirective } from '../../shared/reveal';
+import { CarCardComponent } from '../../shared/car-card/car-card';
 
 @Component({
-  selector: 'app-car-list',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './car-list.html',
-  styleUrl: './car-list.css',
+  selector: 'app-car-list', standalone: true,
+  imports: [RouterLink, CarCardComponent, RevealDirective],
+  templateUrl: './car-list.html', styleUrl: './car-list.css'
 })
 export class CarListComponent implements OnInit {
-  // Injection du service
   private carService = inject(CarService);
+  private route = inject(ActivatedRoute);
 
-  constructor(private router: Router) {}
-
-  // Utilisation du signal du service
   cars = this.carService.cars;
-  loaded = this.carService.loaded;
   search = signal('');
   gearbox = signal('all');
-  filtered = computed(() =>
-    this.cars().filter(
-      (c) =>
-        (this.gearbox() === 'all' || c.typeBoite === this.gearbox()) &&
-        `${c.marque} ${c.modele}`.toLowerCase().includes(this.search().toLowerCase()),
-    ),
-  );
+  range = signal<{ debut: string; fin: string } | null>(null);
+  private freeIds = signal<Set<number> | null>(null);
 
-  ngOnInit(): void {
-    // On déclenche le chargement des données au démarrage
+  ready = computed(() => this.carService.loaded() && (!this.range() || this.freeIds() !== null));
+  filtered = computed(() => {
+    const free = this.freeIds(), q = this.search().toLowerCase(), g = this.gearbox();
+    return this.cars().filter(c =>
+      (!free || free.has(c.id!)) &&
+      (g === 'all' || c.typeBoite === g) &&
+      `${c.marque} ${c.modele}`.toLowerCase().includes(q));
+  });
+
+  ngOnInit() {
     this.carService.getAllCars();
-  }
-
-  reserverVoiture(car: Car) {
-    this.router.navigate(['/reservations'], { queryParams: { carId: car.id } });
+    const q = this.route.snapshot.queryParamMap;
+    const debut = q.get('debut'), fin = q.get('fin');
+    if (debut && fin) {
+      this.range.set({ debut, fin });
+      this.carService.getAvailable(debut, fin).subscribe({
+        next: l => this.freeIds.set(new Set(l.map(c => c.id!))),
+        error: () => this.freeIds.set(new Set())
+      });
+    }
   }
 }
