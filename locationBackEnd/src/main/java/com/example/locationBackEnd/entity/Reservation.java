@@ -40,4 +40,6 @@ public class Reservation {
 
     @PositiveOrZero(message = "Le prix total ne peut pas être négatif")
     private Double prixTotal;
+
+    private String extras;
 }

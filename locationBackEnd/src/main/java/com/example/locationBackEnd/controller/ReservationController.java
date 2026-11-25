@@ -44,6 +44,15 @@ public class ReservationController {
     }
 
 
+    @GetMapping
+    public List<ReservationResponse> all() { return reservationService.findAll(); }
+
+    @PutMapping("/{id}/status")
+    public ReservationResponse status(@PathVariable Long id, @RequestParam String value) {
+        return reservationService.updateStatus(id, value);
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) { // Changé Long en String
         reservationService.delete(id);

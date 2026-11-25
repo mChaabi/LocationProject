@@ -20,16 +20,16 @@ public class UserService {
     private final UserMapper userMapper;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    // --- CREATE (Inscription) ---
     @Transactional
     public UserResponseDTO create(UserRequestDTO dto) {
         if (userRepository.existsByEmail(dto.email())) {
             throw new RuntimeException("Cet email est déjà utilisé.");
         }
 
-        User user = userMapper.toEntity(dto);
-        // Sécurité : on hache le mot de passe avant de sauvegarder
-        user.setPassword(passwordEncoder.encode(dto.password()));
+        User user = userMapper.toEntity(dto); // or: User user = new User();
+        user.setEmail(dto.email());
+        user.setPassword(passwordEncoder.encode(dto.password())); // check your entity/DTO field names
+        user.setRole("client"); // or Role enum if your User.role is an Enum
 
         User savedUser = userRepository.save(user);
         return userMapper.toResponse(savedUser);

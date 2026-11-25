@@ -29,6 +29,10 @@ public class CarController {
     public ResponseEntity<CarDTO> createCar(@Valid @RequestBody CarDTO carDTO) {
         return new ResponseEntity<>(carService.create(carDTO), HttpStatus.CREATED);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<CarDTO> update(@PathVariable String id, @Valid @RequestBody CarDTO dto) {
+        return ResponseEntity.ok(carService.update(id, dto));
+    }
 
     // 3. Poster beaucoup de voitures d'un coup (Bulk)
     @PostMapping("/bulk")

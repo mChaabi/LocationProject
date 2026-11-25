@@ -8,5 +8,7 @@ public record ReservationResponse(
         LocalDate dateDebut,
         LocalDate dateFin,
         Double prixTotal,
-        String statut
+        String statut,
+        String extras
+
 ) {}
