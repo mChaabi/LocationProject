@@ -5,6 +5,8 @@ import { ReservationService } from '../../services/reservation-service';
 import { Car } from '../../models/car';
 import { OptionService } from '../../services/option';
 import { ExtraOption } from '../../models/ExtraOption';
+import { PricingService } from '../../services/pricing';
+import { Promo, Rule } from '../../models/pricing';
 
 @Component({
   selector: 'app-admin',
@@ -21,6 +23,16 @@ export class AdminComponent implements OnInit {
   reservations = signal<any[]>([]);
   showForm = signal(false);
   editingId = signal<string | null>(null);
+
+  private fb = inject(FormBuilder);
+  private pricing = inject(PricingService);
+  promos = this.pricing.promos;
+  rules = computed(() => {
+    const r = this.pricing.rules();
+    return r ? [...r.loyalty, ...r.duration] : [];
+  });
+  maxRate = computed(() => this.pricing.rules()?.maxRate ?? 30);
+  promoError = signal('');
 
   private optService = inject(OptionService);
   options = this.optService.options;
@@ -52,6 +64,19 @@ export class AdminComponent implements OnInit {
     disponible: true,
   });
 
+  promoForm = this.fb.nonNullable.group({
+    code: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9_-]{3,20}$/)]],
+    percent: [10, [Validators.min(1), Validators.max(50)]],
+    expiresAt: '',
+    maxUses: 0,
+  });
+  ruleForm = this.fb.nonNullable.group({
+    kind: ['LOYALTY' as Rule['kind']],
+    name: ['', Validators.required],
+    threshold: [1, Validators.min(1)],
+    rate: [5, [Validators.min(1), Validators.max(50)]],
+  });
+
   stats = computed(() => {
     const r = this.reservations();
     return [
@@ -72,6 +97,42 @@ export class AdminComponent implements OnInit {
   }
   loadReservations() {
     this.resService.getAll().subscribe((r) => this.reservations.set(r));
+  }
+
+  addPromo() {
+    const f = this.promoForm.getRawValue();
+    this.promoError.set('');
+    this.pricing
+      .savePromo({
+        code: f.code.toUpperCase(),
+        percent: f.percent,
+        active: true,
+        uses: 0,
+        expiresAt: f.expiresAt || null,
+        maxUses: f.maxUses > 0 ? f.maxUses : null,
+      })
+      .subscribe({
+        next: () => this.promoForm.patchValue({ code: '' }),
+        error: () => this.promoError.set('Création impossible (ce code existe peut-être déjà).'),
+      });
+  }
+  togglePromo(p: Promo) {
+    this.pricing.savePromo({ ...p, active: !p.active }).subscribe();
+  }
+  removePromo(p: Promo) {
+    if (confirm(`Supprimer le code ${p.code} ?`)) this.pricing.removePromo(p.id!).subscribe();
+  }
+
+  addRule() {
+    this.pricing
+      .saveRule(this.ruleForm.getRawValue())
+      .subscribe(() => this.ruleForm.patchValue({ name: '' }));
+  }
+  updateRule(r: Rule, patch: Partial<Rule>) {
+    this.pricing.saveRule({ ...r, ...patch }).subscribe();
+  }
+  removeRule(r: Rule) {
+    if (confirm(`Supprimer la règle ${r.name} ?`)) this.pricing.removeRule(r.id!).subscribe();
   }
 
   openForm(car?: Car) {

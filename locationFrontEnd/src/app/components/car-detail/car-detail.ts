@@ -37,18 +37,33 @@ export class CarDetailComponent implements OnInit {
   });
   private dates = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
-  // Price comes from the backend: dates, options or user change -> new quote
-  quote = toSignal(
-    toObservable(computed(() => ({ ...this.dates(), ids: this.extras(), uid: this.user()?.id }))).pipe(
-      debounceTime(250),
-      switchMap(p => p.dateDebut && p.dateFin && p.dateFin > p.dateDebut
-        ? this.reservations
-            .quote(this.id, p.dateDebut, p.dateFin, p.ids, p.uid != null ? String(p.uid) : undefined)
-            .pipe(catchError(() => of(null)))
-        : of(null))
-    ),
-    { initialValue: null }
-  );
+  promoInput = signal('');
+promo = signal('');                       // code sent to the backend
+promoMessage = computed(() => {
+  const msg: Record<string, string> = {
+    INVALID: 'Code inconnu', INACTIVE: 'Ce code n’est plus actif',
+    EXPIRED: 'Ce code a expiré', EXHAUSTED: 'Ce code a atteint sa limite d’utilisation'
+  };
+  return msg[this.quote()?.promoStatus ?? ''] ?? '';
+});
+
+quote = toSignal(
+  toObservable(computed(() => ({
+    ...this.dates(), ids: this.extras(), promo: this.promo(), uid: this.user()?.id
+  }))).pipe(
+    debounceTime(250),
+    switchMap(p => p.dateDebut && p.dateFin && p.dateFin > p.dateDebut
+      ? this.reservations
+          .quote(this.id, p.dateDebut, p.dateFin, p.ids,
+                 p.uid != null ? String(p.uid) : undefined, p.promo || undefined)
+          .pipe(catchError(() => of(null)))
+      : of(null))
+  ),
+  { initialValue: null }
+);
+
+applyPromo() { this.promo.set(this.promoInput().trim().toUpperCase()); }
+clearPromo() { this.promo.set(''); this.promoInput.set(''); }
 
   ngOnInit() {
     if (!this.carService.cars().length) this.carService.getAllCars();

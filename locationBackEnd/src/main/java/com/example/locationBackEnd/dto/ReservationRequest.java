@@ -12,5 +12,6 @@ public record ReservationRequest(
         @NotBlank String userId,
         @NotNull @FutureOrPresent LocalDate dateDebut,
         @NotNull LocalDate dateFin,
-        List<Long> optionIds
+        List<Long> optionIds,
+        String promoCode
 ) {}

@@ -44,4 +44,6 @@ public class Reservation {
     private Double prixTotal;
 
     private String extras;
+
+    private String promoCode;
 }

@@ -56,6 +56,38 @@
             <label>Date de début<input type="date" formControlName="dateDebut" /></label>
             <label>Date de fin<input type="date" formControlName="dateFin" /></label>
 
+            <div class="promo">
+              @if (quote()?.promoStatus === 'OK') {
+                <div class="chip-ok">
+                  <span class="tick">✓</span>
+                  <span><b>{{ promo() }}</b> appliqué · −{{ quote()?.promoRate }}%</span>
+                  <button type="button" (click)="clearPromo()" aria-label="Retirer le code">✕</button>
+                </div>
+              } @else {
+                <div class="promo-row" [class.shake]="promoMessage()">
+                  <input
+                    placeholder="Code promo"
+                    [value]="promoInput()"
+                    (input)="promoInput.set($any($event.target).value)"
+                    (keydown.enter)="applyPromo(); $event.preventDefault()"
+                  />
+                  <button
+                    type="button"
+                    class="apply"
+                    [disabled]="!promoInput().trim()"
+                    (click)="applyPromo()"
+                  >
+                    Appliquer
+                  </button>
+                </div>
+                @if (promoMessage()) {
+                  <p class="promo-err">{{ promoMessage() }}</p>
+                } @else if (promo() && !quote()) {
+                  <p class="hint">Le code sera vérifié dès que vos dates sont choisies.</p>
+                }
+              }
+            </div>
+
             @if (quote(); as q) {
               <ul class="sum">
                 <li>
@@ -78,6 +110,15 @@
                   <li class="disc">
                     <span>📆 Long séjour</span><b>−{{ q.durationRate }}%</b>
                   </li>
+                }
+                @if (q.promoRate > 0) {
+                  <li class="disc">
+                    <span>🏷️ Code {{ q.promoCode }}</span
+                    ><b>−{{ q.promoRate }}%</b>
+                  </li>
+                }
+                @if (q.loyaltyRate + q.durationRate + q.promoRate > q.totalRate) {
+                  <li class="cap"><span>Plafond de remise atteint : {{ q.totalRate }}%</span></li>
                 }
                 @if (q.discount > 0) {
                   <li class="disc">
@@ -109,7 +150,7 @@
             @if (error()) {
               <p class="err">{{ error() }}</p>
             }
-            <button class="btn" [disabled]="form.invalid || !quote() || !c.disponible || sending()">
+            <button class="btn" [disabled]="form.invalid || !quote() || !c.disponible || sending() || (promo() && quote()?.promoStatus !== 'OK')">
               {{
                 !c.disponible
                   ? 'Indisponible'

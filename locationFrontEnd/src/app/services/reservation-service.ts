@@ -30,13 +30,28 @@ export class ReservationService {
     return this.http.put(`${this.apiUrl}/${id}/status`, null, { params: { value } });
   }
 
-  quote(carId: string, debut: string, fin: string, optionIds: number[], userId?: string) {
-  const params: Record<string, string | string[]> = { carId, debut, fin, optionIds: optionIds.map(String) };
-  if (userId) params['userId'] = userId;
-  return this.http.get<Quote>(`${this.apiUrl}/quote`, { params });
-}
-loyalty(userId: string) { return this.http.get<Loyalty>(`${this.apiUrl}/loyalty/${userId}`); }
-cancel(id: number, userId: string) {
-  return this.http.put<any>(`${this.apiUrl}/${id}/cancel`, null, { params: { userId } });
-}
+  quote(
+    carId: string,
+    debut: string,
+    fin: string,
+    optionIds: number[],
+    userId?: string,
+    promo?: string,
+  ) {
+    const params: Record<string, string | string[]> = {
+      carId,
+      debut,
+      fin,
+      optionIds: optionIds.map(String),
+    };
+    if (userId) params['userId'] = userId;
+    if (promo) params['promo'] = promo;
+    return this.http.get<Quote>(`${this.apiUrl}/quote`, { params });
+  }
+  loyalty(userId: string) {
+    return this.http.get<Loyalty>(`${this.apiUrl}/loyalty/${userId}`);
+  }
+  cancel(id: number, userId: string) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/cancel`, null, { params: { userId } });
+  }
 }

@@ -11,8 +11,12 @@
         <b>Niveau {{ l.tier }}</b> <span>· −{{ l.rate }}% sur chaque location</span>
         <div class="track"><i [style.width.%]="l.progress"></i></div>
         <small>
-          @if (l.nextTier) { Encore {{ l.toNext }} location(s) confirmée(s) pour atteindre {{ l.nextTier }} (−{{ l.nextRate }}%) }
-          @else { Niveau maximum atteint 🎉 }
+          @if (l.nextTier) {
+            Encore {{ l.toNext }} location(s) confirmée(s) pour atteindre {{ l.nextTier }}
+            (−{{ l.nextRate }}%)
+          } @else {
+            Niveau maximum atteint 🎉
+          }
         </small>
       </div>
       <div class="num"><b>{{ l.rentals }}</b><small>locations</small></div>
@@ -37,12 +41,15 @@
         <div class="top">
           <div class="thumb">
             <span>🚗</span>
-            @if (r.carImage) { <img [src]="r.carImage" alt="" (error)="$any($event.target).remove()"> }
+            @if (r.carImage) {
+              <img [src]="r.carImage" alt="" (error)="$any($event.target).remove()">
+            }
           </div>
           <div class="grow">
             <h3>{{ r.carName }}</h3>
             <p>📅 {{ r.dateDebut }} → {{ r.dateFin }}</p>
             @if (r.extras) { <small>➕ {{ r.extras }}</small> }
+            @if (r.promoCode) { <small class="promo-tag">🏷️ {{ r.promoCode }}</small> }
           </div>
           <div class="amount">
             <b>{{ r.prixTotal }}€</b>

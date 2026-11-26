@@ -8,11 +8,60 @@
     <button [class.on]="tab() === 'reservations'" (click)="tab.set('reservations')">
       📅 Réservations
     </button>
+    <button [class.on]="$any(tab()) === 'promos'" (click)="tab.set($any('promos'))">🏷️ Promotions</button>
     <button [class.on]="tab() === 'options'" (click)="tab.set('options')">➕ Options</button>
   </aside>
 
   <main>
-    @switch (tab()) {
+    @switch ($any(tab())) {
+      @case ('promos') {
+  <div class="bar"><h2>Codes promo</h2></div>
+  <form class="promoform" [formGroup]="promoForm" (ngSubmit)="addPromo()">
+    <input formControlName="code" placeholder="CODE10">
+    <input type="number" formControlName="percent" placeholder="%">
+    <input type="date" formControlName="expiresAt" title="Date d'expiration (optionnel)">
+    <input type="number" formControlName="maxUses" placeholder="Usages max (0 = illimité)">
+    <button class="btn" [disabled]="promoForm.invalid">+ Créer</button>
+  </form>
+  @if (promoError()) { <p class="err">{{ promoError() }}</p> }
+
+  <div class="table">
+    @for (p of promos(); track p.id; let i = $index) {
+      <div class="row" [style.--i]="i">
+        <div class="grow">
+          <b>{{ p.code }}</b>
+          <small>−{{ p.percent }}% · {{ p.uses }}{{ p.maxUses ? '/' + p.maxUses : '' }} utilisation(s){{ p.expiresAt ? ' · expire le ' + p.expiresAt : '' }}</small>
+        </div>
+        <button class="pill" [class.ok]="p.active" (click)="togglePromo(p)">{{ p.active ? 'Actif' : 'Inactif' }}</button>
+        <button class="ghost red" (click)="removePromo(p)">🗑️</button>
+      </div>
+    } @empty { <p class="empty">Aucun code promo.</p> }
+  </div>
+
+  <div class="bar sub"><h2>Règles de réduction</h2></div>
+  <p class="note">Plafond cumulé (fidélité + durée + promo) : <b>{{ maxRate() }}%</b></p>
+  <form class="promoform rule" [formGroup]="ruleForm" (ngSubmit)="addRule()">
+    <select formControlName="kind"><option value="LOYALTY">Fidélité</option><option value="DURATION">Durée</option></select>
+    <input formControlName="name" placeholder="Nom (ex. Platinum)">
+    <input type="number" formControlName="threshold" placeholder="Seuil">
+    <input type="number" formControlName="rate" placeholder="%">
+    <button class="btn" [disabled]="ruleForm.invalid">+ Ajouter</button>
+  </form>
+
+  <div class="table">
+    @for (r of rules(); track r.id; let i = $index) {
+      <div class="row" [style.--i]="i">
+        <span class="pill kind">{{ r.kind === 'LOYALTY' ? 'Fidélité' : 'Durée' }}</span>
+        <div class="grow"><b>{{ r.name }}</b></div>
+        <label class="mini">{{ r.kind === 'LOYALTY' ? 'Locations ≥' : 'Jours ≥' }}
+          <input type="number" [value]="r.threshold" (change)="updateRule(r, { threshold: +$any($event.target).value })"></label>
+        <label class="mini">Remise %
+          <input type="number" [value]="r.rate" (change)="updateRule(r, { rate: +$any($event.target).value })"></label>
+        <button class="ghost red" (click)="removeRule(r)">🗑️</button>
+      </div>
+    }
+  </div>
+}
       @case ('dashboard') {
         <div class="stats">
           @for (s of stats(); track s.label; let i = $index) {

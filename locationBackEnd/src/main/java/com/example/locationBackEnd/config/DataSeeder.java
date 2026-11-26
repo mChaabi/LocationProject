@@ -1,11 +1,7 @@
 package com.example.locationBackEnd.config;
 
-import com.example.locationBackEnd.entity.Car;
-import com.example.locationBackEnd.entity.ExtraOption;
-import com.example.locationBackEnd.entity.User;
-import com.example.locationBackEnd.repository.CarRepository;
-import com.example.locationBackEnd.repository.ExtraOptionRepository;
-import com.example.locationBackEnd.repository.UserRepository;
+import com.example.locationBackEnd.entity.*;
+import com.example.locationBackEnd.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +16,8 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository users;
     private final BCryptPasswordEncoder encoder;
     private final ExtraOptionRepository extras;
+    private final DiscountRuleRepository rules;
+    private final PromoCodeRepository promos;
 
     @Override
     public void run(String... args) {
@@ -48,10 +46,24 @@ public class DataSeeder implements CommandLineRunner {
                     ExtraOption.builder().icon("...").name("Wi-Fi 4G").price(3).build()
             ));
         }
+
+        if (rules.count() == 0) {
+            rules.saveAll(List.of(
+                    rule(DiscountRule.Kind.LOYALTY, "Bronze", 1, 5), rule(DiscountRule.Kind.LOYALTY, "Silver", 3, 10),
+                    rule(DiscountRule.Kind.LOYALTY, "Gold", 6, 15),
+                    rule(DiscountRule.Kind.DURATION, "Long séjour", 7, 5), rule(DiscountRule.Kind.DURATION, "Très long séjour", 14, 10)));
+        }
+        if (promos.count() == 0) promos.save(PromoCode.builder().code("BIENVENUE10").percent(10).build());
+
+
     }
 
     private Car car(String marque, String modele, String boite, String couleur, int annee, double prix, String img) {
         return Car.builder().marque(marque).modele(modele).typeBoite(boite).couleur(couleur)
                 .annee(annee).prixJournalier(prix).disponible(true).imageUrL(img).build();
+    }
+
+    private DiscountRule rule(DiscountRule.Kind k, String name, int threshold, int rate) {
+        return DiscountRule.builder().kind(k).name(name).threshold(threshold).rate(rate).build();
     }
 }

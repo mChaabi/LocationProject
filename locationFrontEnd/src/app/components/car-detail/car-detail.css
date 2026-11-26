@@ -46,3 +46,25 @@ input[type=date]:focus { border-color:var(--primary); outline:0; }
   font-size:1.8rem; color:#fff; background:linear-gradient(135deg,#10b981,#059669); animation:pop .6s var(--ease); }
 .success p { margin:4px 0; } .success small { color:#047857; display:block; margin-bottom:16px; }
 .success .btn { display:inline-block; margin-top:8px; }
+
+.promo { margin:4px 0 16px; }
+.promo-row { display:flex; gap:8px; }
+.promo-row input { flex:1; min-width:0; padding:12px 14px; border:2px dashed var(--line); border-radius:12px;
+  font:600 .9rem 'Inter'; text-transform:uppercase; letter-spacing:.06em; transition:border .3s; }
+.promo-row input:focus { border-color:var(--primary); border-style:solid; outline:0; }
+.apply { padding:0 18px; border:0; border-radius:12px; background:var(--ink); color:#fff; font:600 .85rem 'Inter';
+  cursor:pointer; transition:transform .25s var(--ease), opacity .25s; }
+.apply:hover:not(:disabled) { transform:translateY(-2px); } .apply:disabled { opacity:.35; cursor:not-allowed; }
+
+.shake { animation:shake .45s var(--ease); }
+@keyframes shake { 20%, 60% { transform:translateX(-7px); } 40%, 80% { transform:translateX(7px); } }
+.promo-err { color:var(--danger); font-size:.82rem; margin:8px 2px 0; animation:fadeUp .35s var(--ease) backwards; }
+
+.chip-ok { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; background:#ecfdf5;
+  color:#047857; font-size:.9rem; animation:slideIn .5s var(--ease) backwards; }
+.chip-ok .tick { width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:#10b981;
+  color:#fff; font-size:.8rem; animation:pop .5s var(--ease) .15s backwards; }
+.chip-ok button { margin-left:auto; border:0; background:none; cursor:pointer; color:#047857; font-size:1rem; transition:transform .25s var(--ease); }
+.chip-ok button:hover { transform:rotate(90deg); }
+@keyframes slideIn { from { opacity:0; transform:translateY(-10px) scale(.96); } }
+.cap { color:var(--muted); font-size:.78rem; }

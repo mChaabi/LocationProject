@@ -39,3 +39,14 @@ aside button.on { color:#fff; background:linear-gradient(135deg,var(--primary),v
 .optform { display:grid; grid-template-columns:70px 1fr 130px auto; gap:12px; margin-bottom:20px; }
 .optform input { padding:13px; border:2px solid var(--line); border-radius:12px; font:inherit; }
 .optform input:focus { border-color:var(--primary); outline:0; }
+
+.promoform { display:grid; grid-template-columns:1.2fr 80px 1fr 150px auto; gap:12px; margin-bottom:20px; }
+.promoform.rule { grid-template-columns:140px 1fr 100px 90px auto; }
+.promoform input, .promoform select, .mini input { padding:12px; border:2px solid var(--line); border-radius:12px; font:inherit; background:#fff; }
+.promoform input:focus, .promoform select:focus, .mini input:focus { border-color:var(--primary); outline:0; }
+.sub { margin-top:44px; } .note { color:var(--muted); margin:-8px 0 16px; font-size:.9rem; }
+.mini { display:grid; gap:4px; font:600 .7rem 'Inter'; color:var(--muted); }
+.mini input { width:92px; padding:8px 10px; }
+.kind { background:#eef2ff; color:#3730a3; }
+.err { color:var(--danger); font-size:.85rem; }
+@media (max-width:900px) { .promoform, .promoform.rule { grid-template-columns:1fr 1fr; } }

@@ -62,8 +62,9 @@ public class ReservationController {
             @RequestParam(required = false) String userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate debut,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(required = false) String promo,
             @RequestParam(required = false) List<Long> optionIds) {
-        return pricingService.quote(carId, userId, debut, fin, optionIds);
+        return pricingService.quote(carId, userId, debut, fin, optionIds, promo);
     }
 
     @GetMapping("/loyalty/{userId}")

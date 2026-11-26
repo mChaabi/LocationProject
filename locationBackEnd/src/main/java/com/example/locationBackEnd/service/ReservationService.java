@@ -38,12 +38,25 @@ public class ReservationService {
         if (!car.isDisponible() || reservationRepository.existsOverlap(car.getId(), req.dateDebut(), req.dateFin()))
             throw new IllegalArgumentException("Voiture non disponible pour ces dates");
 
-        PricingService.Quote q = pricingService.quote(req.carId(), req.userId(), req.dateDebut(), req.dateFin(), req.optionIds());
+        PricingService.Quote q = pricingService.quote(req.carId(), req.userId(),
+                req.dateDebut(), req.dateFin(), req.optionIds(), req.promoCode());
+        if (!List.of("NONE", "OK").contains(q.promoStatus()))
+            throw new IllegalArgumentException("Code promo invalide ou expiré");
+
         Reservation r = reservationMapper.toEntity(req);
         r.setPrixTotal(q.total());
         r.setRemise(q.discount());
         r.setExtras(optionNames(req.optionIds()));
+        if ("OK".equals(q.promoStatus())) {
+            pricingService.consumePromo(q.promoCode());
+            r.setPromoCode(q.promoCode());
+        }
         return toResp(reservationRepository.save(r));
+    }
+
+    /** Frees the promo code when a reservation becomes cancelled */
+    private void releasePromo(Reservation r) {
+        if (r.getPromoCode() != null && !"annulee".equals(r.getStatut())) pricingService.releasePromo(r.getPromoCode());
     }
 
     // --- FIND ALL (Par Utilisateur) ---
@@ -80,11 +93,18 @@ public class ReservationService {
 
     private ReservationResponse toResp(Reservation r) {
         Car car = carRepository.findById(r.getCarId()).orElse(null);
-        return new ReservationResponse(r.getId(),
-                car == null ? "—" : car.getMarque() + " " + car.getModele(),
+        return new ReservationResponse(
+                r.getId(),
+                car == null ? "-" : car.getMarque() + " " + car.getModele(),
                 car == null ? null : car.getImageUrL(),
-                r.getDateDebut(), r.getDateFin(), r.getPrixTotal(),
-                r.getRemise() == null ? 0.0 : r.getRemise(), r.getStatut(), r.getExtras());
+                r.getDateDebut(),
+                r.getDateFin(),
+                r.getPrixTotal(),
+                r.getRemise() == null ? 0.0 : r.getRemise(),
+                r.getStatut(),
+                r.getExtras(),
+                r.getPromoCode()
+        );
     }
 
     @Transactional

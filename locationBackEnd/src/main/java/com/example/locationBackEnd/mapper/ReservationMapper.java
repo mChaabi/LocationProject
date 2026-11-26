@@ -26,6 +26,6 @@ public class ReservationMapper {
     // Transforme l'Entité de la BDD en DTO pour renvoyer au Front
     public ReservationResponse toResponse(Reservation entity) {
         return new ReservationResponse(entity.getId(), entity.getCarId(), null, entity.getDateDebut(),
-                entity.getDateFin(), entity.getPrixTotal(), entity.getRemise(), entity.getStatut(), entity.getExtras());
+                entity.getDateFin(), entity.getPrixTotal(), entity.getRemise(), entity.getStatut(), entity.getExtras(),entity.getPromoCode());
     }
 }

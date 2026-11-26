@@ -4,10 +4,11 @@ import { CarService } from '../../services/car-service';
 import { RevealDirective } from '../../shared/reveal';
 import { CounterDirective } from '../../shared/counter';
 import { CarCardComponent } from '../../shared/car-card/car-card';
+import {BenefitsComponent} from '../../shared/benefits/benefits';
 
 @Component({
   selector: 'app-home', standalone: true,
-  imports: [RouterLink, CarCardComponent, RevealDirective, CounterDirective],
+  imports: [RouterLink, CarCardComponent, RevealDirective, CounterDirective ,BenefitsComponent],
   templateUrl: './home.html', styleUrl: './home.css'
 })
 export class HomeComponent implements OnInit {
