@@ -38,27 +38,87 @@
 
       <aside class="book">
         <div class="price">{{ c.prixJournalier }}€ <i>/jour</i></div>
-        @if (done()) {
-          <div class="success">✅ Réservation envoyée ! Total : {{ total() }}€</div>
+
+        @if (done(); as r) {
+          <div class="success">
+            <span class="check">✓</span>
+            <h3>Demande envoyée !</h3>
+            <p>
+              Total : <b>{{ r.prixTotal }}€</b>
+            </p>
+            @if (r.remise > 0) {
+              <small>dont {{ r.remise }}€ de remise appliquée</small>
+            }
+            <a routerLink="/mes-reservations" class="btn">Suivre ma réservation</a>
+          </div>
         } @else {
           <form [formGroup]="form" (ngSubmit)="submit()">
             <label>Date de début<input type="date" formControlName="dateDebut" /></label>
             <label>Date de fin<input type="date" formControlName="dateFin" /></label>
 
-            <ul class="sum">
-              <li>
-                <span>{{ days() }} jour(s) × {{ perDay() }}€</span><b>{{ total() }}€</b>
-              </li>
-            </ul>
+            @if (quote(); as q) {
+              <ul class="sum">
+                <li>
+                  <span>Voiture · {{ q.days }} j × {{ q.carPerDay }}€</span
+                  ><b>{{ q.days * q.carPerDay }}€</b>
+                </li>
+                @if (q.optionsPerDay > 0) {
+                  <li>
+                    <span>Options · {{ q.days }} j × {{ q.optionsPerDay }}€</span
+                    ><b>{{ q.days * q.optionsPerDay }}€</b>
+                  </li>
+                }
+                @if (q.loyaltyRate > 0) {
+                  <li class="disc">
+                    <span>🏅 Fidélité {{ q.tier }}</span
+                    ><b>−{{ q.loyaltyRate }}%</b>
+                  </li>
+                }
+                @if (q.durationRate > 0) {
+                  <li class="disc">
+                    <span>📆 Long séjour</span><b>−{{ q.durationRate }}%</b>
+                  </li>
+                }
+                @if (q.discount > 0) {
+                  <li class="disc">
+                    <span>Vous économisez</span><b>−{{ q.discount }}€</b>
+                  </li>
+                }
+                <li class="total">
+                  <span>Total</span>
+                  @for (t of [q.total]; track t) {
+                    <b class="pop">{{ t }}€</b>
+                  }
+                </li>
+              </ul>
+              @if (q.nextTier) {
+                <p class="nudge">
+                  🎯 Encore {{ q.rentalsToNext }} location(s) confirmée(s) pour passer
+                  {{ q.nextTier }}.
+                </p>
+              }
+            } @else {
+              <p class="hint">Choisissez vos dates pour voir le prix.</p>
+            }
+
+            <div class="perks">
+              <span>🏅 Fidélité : −5 % · −10 % · −15 %</span>
+              <span>📆 −5 % dès 7 jours · −10 % dès 14 jours</span>
+            </div>
+
             @if (error()) {
               <p class="err">{{ error() }}</p>
             }
-
-            <button
-              class="btn"
-              [disabled]="form.invalid || days() < 1 || !c.disponible || sending()"
-            >
-              {{ c.disponible ? (sending() ? 'Envoi…' : 'Réserver maintenant') : 'Indisponible' }}
+            <button class="btn" [disabled]="form.invalid || !quote() || !c.disponible || sending()">
+              {{
+                !c.disponible
+                  ? 'Indisponible'
+                  : !user()
+                    ? 'Se connecter pour réserver'
+                    : sending()
+                      ? 'Envoi…'
+                      : 'Réserver maintenant'
+              }}
             </button>
           </form>
         }

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,22 +29,20 @@ public class ReservationService {
     private final ReservationMapper reservationMapper;
     private final CarRepository carRepository;
     private final ExtraOptionRepository extraRepository;
+    private final PricingService pricingService;
 
     @Transactional
-    public ReservationResponse create(ReservationRequest request) {
-        Car car = carRepository.findById(request.carId())
+    public ReservationResponse create(ReservationRequest req) {
+        Car car = carRepository.findById(req.carId())
                 .orElseThrow(() -> new EntityNotFoundException("Voiture introuvable"));
-        if (!car.isDisponible() || reservationRepository.existsOverlap(car.getId(), request.dateDebut(), request.dateFin()))
+        if (!car.isDisponible() || reservationRepository.existsOverlap(car.getId(), req.dateDebut(), req.dateFin()))
             throw new IllegalArgumentException("Voiture non disponible pour ces dates");
 
-        List<ExtraOption> chosen = request.optionIds() == null ? List.of()
-                : extraRepository.findAllById(request.optionIds());
-        long jours = Math.max(1, ChronoUnit.DAYS.between(request.dateDebut(), request.dateFin()));
-        double perDay = car.getPrixJournalier() + chosen.stream().mapToDouble(ExtraOption::getPrice).sum();
-
-        Reservation r = reservationMapper.toEntity(request);
-        r.setPrixTotal(jours * perDay);
-        r.setExtras(chosen.stream().map(ExtraOption::getName).collect(Collectors.joining(", ")));
+        PricingService.Quote q = pricingService.quote(req.carId(), req.userId(), req.dateDebut(), req.dateFin(), req.optionIds());
+        Reservation r = reservationMapper.toEntity(req);
+        r.setPrixTotal(q.total());
+        r.setRemise(q.discount());
+        r.setExtras(optionNames(req.optionIds()));
         return toResp(reservationRepository.save(r));
     }
 
@@ -74,11 +73,30 @@ public class ReservationService {
         return toResp(reservationRepository.save(r));
     }
 
+    private String optionNames(List<Long> ids) {
+        return ids == null ? "" : extraRepository.findAllById(ids).stream()
+                .map(ExtraOption::getName).collect(Collectors.joining(", "));
+    }
+
     private ReservationResponse toResp(Reservation r) {
-        String name = carRepository.findById(r.getCarId())
-                .map(c -> c.getMarque() + " " + c.getModele()).orElse("—");
-        ReservationResponse m = reservationMapper.toResponse(r);
-        return new ReservationResponse(m.id(), name, m.dateDebut(), m.dateFin(), m.prixTotal(), m.statut(), m.extras());
+        Car car = carRepository.findById(r.getCarId()).orElse(null);
+        return new ReservationResponse(r.getId(),
+                car == null ? "—" : car.getMarque() + " " + car.getModele(),
+                car == null ? null : car.getImageUrL(),
+                r.getDateDebut(), r.getDateFin(), r.getPrixTotal(),
+                r.getRemise() == null ? 0.0 : r.getRemise(), r.getStatut(), r.getExtras());
+    }
+
+    @Transactional
+    public ReservationResponse cancel(Long id, String userId) {
+        Reservation r = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Réservation non trouvée"));
+        if (!r.getUserId().equals(userId)) throw new IllegalArgumentException("Cette réservation ne vous appartient pas");
+        if ("annulee".equals(r.getStatut())) throw new IllegalArgumentException("Réservation déjà annulée");
+        if (!r.getDateDebut().isAfter(LocalDate.now()))
+            throw new IllegalArgumentException("Annulation impossible : la location a déjà commencé");
+        r.setStatut("annulee");
+        return toResp(reservationRepository.save(r));
     }
 
     // --- DELETE ---

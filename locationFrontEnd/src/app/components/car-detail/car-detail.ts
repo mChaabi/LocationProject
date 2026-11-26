@@ -1,113 +1,73 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { catchError, debounceTime, of, switchMap } from 'rxjs';
 import { CarService } from '../../services/car-service';
 import { ReservationService } from '../../services/reservation-service';
 import { AuthService } from '../../services/auth-service';
 import { OptionService } from '../../services/option';
 
-interface CarItem {
-  id: string | number;
-  marque?: string;
-  modele?: string;
-  typeBoite?: string;
-  couleur?: string;
-  annee?: number | string;
-  prixJournalier?: number;
-  disponible?: boolean;
-  imageUrL?: string;
-}
-
 @Component({
-  selector: 'app-car-detail',
-  standalone: true,
-  imports: [RouterLink, ReactiveFormsModule],
-  templateUrl: './car-detail.html',
-  styleUrl: './car-detail.css',
+  selector: 'app-car-detail', standalone: true, imports: [RouterLink, ReactiveFormsModule],
+  templateUrl: './car-detail.html', styleUrl: './car-detail.css'
 })
 export class CarDetailComponent implements OnInit {
   private carService = inject(CarService);
-  private reservations = inject(ReservationService);
-  private router = inject(Router);
-  private auth = inject(AuthService);
-  private fb = inject(FormBuilder);
-
-  private route = inject(ActivatedRoute);
-  private id = this.route.snapshot.paramMap.get('id');
-
   private optService = inject(OptionService);
+  private reservations = inject(ReservationService);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
+  private id = this.route.snapshot.paramMap.get('id')!;
+  private query = this.route.snapshot.queryParamMap;
+
+  user = this.auth.currentUser;
   options = this.optService.options;
   extras = signal<number[]>([]);
-
-  form = this.fb.nonNullable.group({
-    dateDebut: [this.route.snapshot.queryParamMap.get('debut') ?? '', Validators.required],
-    dateFin: [this.route.snapshot.queryParamMap.get('fin') ?? '', Validators.required],
-  });
-
-  perDay = computed(
-    () =>
-      (this.car()?.prixJournalier ?? 0) +
-      this.options()
-        .filter((o) => this.extras().includes(o.id))
-        .reduce((s, o) => s + o.price, 0),
-  );
-
   sending = signal(false);
-  done = signal(false);
+  done = signal<any>(null);
   error = signal('');
 
-  car = computed(() => {
-    if (this.id === null) {
-      return undefined;
-    }
-    const carsList = (this.carService.cars() as CarItem[]) ?? [];
-    return carsList.find((c: CarItem) => String(c.id) === this.id);
+  car = computed(() => this.carService.cars().find(c => String(c.id) === this.id));
+  form = this.fb.nonNullable.group({
+    dateDebut: [this.query.get('debut') ?? '', Validators.required],
+    dateFin: [this.query.get('fin') ?? '', Validators.required]
   });
+  private dates = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
-  private dates = toSignal(this.form.valueChanges, {
-    initialValue: this.form.getRawValue(),
-  });
-
-  days = computed(() => {
-    const { dateDebut, dateFin } = this.dates();
-    if (!dateDebut || !dateFin) {
-      return 0;
-    }
-    return Math.max(0, Math.round((+new Date(dateFin) - +new Date(dateDebut)) / 864e5));
-  });
-
-  total = computed(() => this.days() * this.perDay());
+  // Price comes from the backend: dates, options or user change -> new quote
+  quote = toSignal(
+    toObservable(computed(() => ({ ...this.dates(), ids: this.extras(), uid: this.user()?.id }))).pipe(
+      debounceTime(250),
+      switchMap(p => p.dateDebut && p.dateFin && p.dateFin > p.dateDebut
+        ? this.reservations
+            .quote(this.id, p.dateDebut, p.dateFin, p.ids, p.uid != null ? String(p.uid) : undefined)
+            .pipe(catchError(() => of(null)))
+        : of(null))
+    ),
+    { initialValue: null }
+  );
 
   ngOnInit() {
     if (!this.carService.cars().length) this.carService.getAllCars();
     this.optService.load();
   }
+
   toggle(id: number) {
-    this.extras.update((l) => (l.includes(id) ? l.filter((k) => k !== id) : [...l, id]));
+    this.extras.update(l => l.includes(id) ? l.filter(k => k !== id) : [...l, id]);
   }
 
-  submit(): void {
-    this.sending.set(true);
-    this.error.set('');
-
-    const currentUserId = this.auth.currentUser()?.id ?? 'guest';
-
-    this.reservations
-      .createReservation({
-        carId: this.id,
-        userId: String(currentUserId),
-        ...this.form.getRawValue(),
-      })
-      .subscribe({
-        next: () => {
-          this.done.set(true);
-          this.sending.set(false);
-        },
-        error: (err) => {
-          this.error.set(typeof err?.error === 'string' ? err.error : 'Erreur, réessayez.');
-          this.sending.set(false);
-        },
-      });
+  submit() {
+    const user = this.user();
+    if (!user) { this.router.navigate(['/login']); return; }
+    this.sending.set(true); this.error.set('');
+    this.reservations.createReservation({
+      carId: this.id, userId: String(user.id), optionIds: this.extras(), ...this.form.getRawValue()
+    }).subscribe({
+      next: res => { this.done.set(res.data); this.sending.set(false); },
+      error: e => { this.error.set(typeof e.error === 'string' ? e.error : 'Erreur, réessayez.'); this.sending.set(false); }
+    });
   }
 }

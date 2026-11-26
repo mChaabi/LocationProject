@@ -38,6 +38,8 @@ public class Reservation {
             message = "Le statut doit être : en_attente, confirmee ou annulee")
     private String statut;
 
+    private Double remise;
+
     @PositiveOrZero(message = "Le prix total ne peut pas être négatif")
     private Double prixTotal;
 

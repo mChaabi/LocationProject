@@ -18,4 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   where r.carId = :carId and r.statut <> 'annulee'
     and r.dateDebut <= :fin and r.dateFin >= :debut""")
     boolean existsOverlap(String carId, LocalDate debut, LocalDate fin);
+
+    long countByUserIdAndStatut(String userId, String statut);
 }
