@@ -9,6 +9,7 @@ import { LoginComponent } from './components/login/login';
 import { AdminComponent } from './components/admin/admin';
 import { adminGuard, authGuard } from './core/admin-guard';
 import { MyReservationsComponent } from './components/my-reservations/my-reservations';
+import { MyDocumentsComponent } from './components/my-documents/my-documents';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' }, // Redirection par défaut vers l'accueil
@@ -23,4 +24,5 @@ export const routes: Routes = [
   { path: 'reservations', redirectTo: 'mes-reservations' },
   { path: 'cars', component: CarListComponent },
   { path: 'cars/:id', component: CarDetailComponent },
+  { path: 'mes-documents', component: MyDocumentsComponent, canActivate: [authGuard] },
 ];

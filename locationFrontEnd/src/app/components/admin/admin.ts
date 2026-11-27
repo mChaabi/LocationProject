@@ -7,11 +7,14 @@ import { OptionService } from '../../services/option';
 import { ExtraOption } from '../../models/ExtraOption';
 import { PricingService } from '../../services/pricing';
 import { Promo, Rule } from '../../models/pricing';
+import { AdminClientsComponent } from './admin-clients/admin-clients';
+import { CarMediaComponent } from './car-media/car-media';
+import { ReservationFileComponent } from './reservation-file/reservation-file';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, AdminClientsComponent, CarMediaComponent, ReservationFileComponent],
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
@@ -34,9 +37,14 @@ export class AdminComponent implements OnInit {
   maxRate = computed(() => this.pricing.rules()?.maxRate ?? 30);
   promoError = signal('');
 
+  tab = signal<'dashboard' | 'cars' | 'reservations' | 'clients' | 'options' | 'promos'>(
+    'dashboard',
+  );
+  file = signal<any>(null);
+  mediaCar = signal<Car | null>(null);
+
   private optService = inject(OptionService);
   options = this.optService.options;
-  tab = signal<'dashboard' | 'cars' | 'reservations' | 'options'>('dashboard');
   optForm = inject(FormBuilder).nonNullable.group({
     icon: '✨',
     name: ['', Validators.required],

@@ -4,7 +4,23 @@
 
     <div class="layout">
       <div class="left">
-        <div class="photo"><img [src]="c.imageUrL" [alt]="c.modele" /></div>
+        @let main = photos()[active()] ?? c.imageUrL;
+        <div class="photo">
+          @if (main) {
+            @for (s of [main]; track s) {
+              <img [src]="s" [alt]="c.modele" />
+            }
+          }
+        </div>
+        @if (photos().length > 1) {
+          <div class="thumbs">
+            @for (s of photos(); track s; let i = $index) {
+              <button [class.on]="i === active()" (click)="active.set(i)">
+                <img [src]="s" alt="" />
+              </button>
+            }
+          </div>
+        }
         <small>{{ c.marque }}</small>
         <h1>{{ c.modele }}</h1>
 
@@ -60,8 +76,12 @@
               @if (quote()?.promoStatus === 'OK') {
                 <div class="chip-ok">
                   <span class="tick">✓</span>
-                  <span><b>{{ promo() }}</b> appliqué · −{{ quote()?.promoRate }}%</span>
-                  <button type="button" (click)="clearPromo()" aria-label="Retirer le code">✕</button>
+                  <span
+                    ><b>{{ promo() }}</b> appliqué · −{{ quote()?.promoRate }}%</span
+                  >
+                  <button type="button" (click)="clearPromo()" aria-label="Retirer le code">
+                    ✕
+                  </button>
                 </div>
               } @else {
                 <div class="promo-row" [class.shake]="promoMessage()">
@@ -118,7 +138,9 @@
                   </li>
                 }
                 @if (q.loyaltyRate + q.durationRate + q.promoRate > q.totalRate) {
-                  <li class="cap"><span>Plafond de remise atteint : {{ q.totalRate }}%</span></li>
+                  <li class="cap">
+                    <span>Plafond de remise atteint : {{ q.totalRate }}%</span>
+                  </li>
                 }
                 @if (q.discount > 0) {
                   <li class="disc">
@@ -150,7 +172,16 @@
             @if (error()) {
               <p class="err">{{ error() }}</p>
             }
-            <button class="btn" [disabled]="form.invalid || !quote() || !c.disponible || sending() || (promo() && quote()?.promoStatus !== 'OK')">
+            <button
+              class="btn"
+              [disabled]="
+                form.invalid ||
+                !quote() ||
+                !c.disponible ||
+                sending() ||
+                (promo() && quote()?.promoStatus !== 'OK')
+              "
+            >
               {{
                 !c.disponible
                   ? 'Indisponible'

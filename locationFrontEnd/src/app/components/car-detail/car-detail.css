@@ -68,3 +68,8 @@ input[type=date]:focus { border-color:var(--primary); outline:0; }
 .chip-ok button:hover { transform:rotate(90deg); }
 @keyframes slideIn { from { opacity:0; transform:translateY(-10px) scale(.96); } }
 .cap { color:var(--muted); font-size:.78rem; }
+
+.thumbs { display:flex; gap:10px; margin:-10px 0 24px; overflow-x:auto; }
+.thumbs button { width:88px; height:64px; padding:0; border:2px solid transparent; border-radius:12px; overflow:hidden; cursor:pointer; opacity:.6; transition:all .3s var(--ease); }
+.thumbs button.on, .thumbs button:hover { opacity:1; border-color:var(--primary); transform:translateY(-3px); }
+.thumbs img { width:100%; height:100%; object-fit:cover; }
