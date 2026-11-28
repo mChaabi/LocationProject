@@ -48,6 +48,7 @@ export class AdminComponent implements OnInit {
   optForm = inject(FormBuilder).nonNullable.group({
     icon: '✨',
     name: ['', Validators.required],
+    description: '',
     price: [5, Validators.min(0.5)],
   });
 

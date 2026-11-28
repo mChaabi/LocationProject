@@ -18,6 +18,7 @@ public class ExtraOption {
     @NotBlank
     private String name;
     private String icon;
+    String description;
     @Positive
     private double price;   // € per day
 }

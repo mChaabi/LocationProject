@@ -1,0 +1,42 @@
+<div class="journey">
+  <aside class="side">
+    <div class="side-head"><span class="kicker">Votre réservation</span><h2>Quelques minutes</h2></div>
+
+    <ol class="steps" [style.--n]="store.steps.length" [style.--p]="progress()">
+      @for (s of store.steps; track s.key; let i = $index) {
+        @let st = state(s.key);
+        <li [class]="'step ' + st" [style.--i]="i">
+          <button type="button" (click)="go(s.key)" [disabled]="st === 'locked' || st === 'soon'">
+            <span class="node">@if (st === 'done') { ✓ } @else { {{ s.icon }} }</span>
+            <span class="txt"><b>{{ s.label }}</b><small>{{ st === 'soon' ? 'Bientôt disponible' : s.hint }}</small></span>
+            @if (st === 'locked') { <span class="lock">🔒</span> }
+          </button>
+        </li>
+      }
+    </ol>
+
+    @if (car(); as c) {
+      <div class="pick">
+        <div class="pthumb">@if (c.imageUrL) { <img [src]="c.imageUrL" [alt]="c.modele"> } @else { {{ c.marque[0] }} }</div>
+        <div class="pinfo">
+          <small>Votre sélection</small><b>{{ c.marque }} {{ c.modele }}</b>
+          @if (store.debut() && store.fin()) { <small>{{ store.debut() }} → {{ store.fin() }}</small> }
+        </div>
+        @if (total() !== null) { @for (t of [total()]; track t) { <div class="ptotal">{{ t }}€</div> } }
+      </div>
+    }
+  </aside>
+
+  <main class="stage">
+    @for (k of [current()]; track k) {
+      <div class="stage-in">
+        @switch (k) {
+          @case ('account')   { <app-step-account (completed)="advance()" /> }
+          @case ('options')   { <app-step-options (completed)="advance()" /> }
+          @case ('documents') { <app-step-documents (completed)="advance()" /> }
+          @case ('confirm')   { <app-step-confirm /> }
+        }
+      </div>
+    }
+  </main>
+</div>

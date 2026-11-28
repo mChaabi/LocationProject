@@ -1,0 +1,101 @@
+<header class="step-head">
+  <span class="kicker">Étape 2</span>
+  <h1>Votre voiture et <em>vos options</em></h1>
+  <p>Choisissez vos dates et composez votre location. Le prix se met à jour en direct.</p>
+</header>
+
+@if (car(); as c) {
+  <div class="car-bar">
+    <div class="thumb">@if (c.imageUrL) { <img [src]="c.imageUrL" [alt]="c.modele"> } @else { <span>{{ c.marque[0] }}</span> }</div>
+    <div class="grow">
+      <small>{{ c.marque }}</small><h2>{{ c.modele }}</h2>
+      <div class="chips"><span>⚙️ {{ c.typeBoite }}</span><span>🎨 {{ c.couleur }}</span><span>📅 {{ c.annee }}</span></div>
+    </div>
+    <div class="ppd">{{ c.prixJournalier }}€<i>/jour</i></div>
+    <a class="change" routerLink="/cars">Changer</a>
+  </div>
+}
+
+@if (store.reservation(); as r) {
+  <div class="locked">
+    <div class="ok">✓</div>
+    <div class="grow">
+      <b>Sélection enregistrée</b>
+      <small>{{ r.dateDebut }} → {{ r.dateFin }} · {{ r.prixTotal }}€@if (r.extras) { · {{ r.extras }} }</small>
+    </div>
+    <button type="button" class="soft" (click)="edit()">Modifier</button>
+    <button type="button" class="btn" (click)="completed.emit()">Continuer</button>
+  </div>
+  @if (error()) { <p class="err">{{ error() }}</p> }
+} @else {
+  <div class="cols">
+    <div class="main">
+      <section class="block">
+        <h3><span>1</span> Dates de location</h3>
+        <div class="dates">
+          <label>Départ<input type="date" [min]="today" [value]="store.debut()" (change)="setDebut($any($event.target).value)"></label>
+          <label>Retour<input type="date" [min]="minFin()" [value]="store.fin()" (change)="store.fin.set($any($event.target).value)"></label>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3><span>2</span> Options <small>{{ store.extras().length }} sélectionnée(s)</small></h3>
+        <div class="opt-grid">
+          @for (o of options(); track o.id; let i = $index) {
+            @let on = store.extras().includes(o.id);
+            <button type="button" class="opt" appSpotlight [class.on]="on" [style.--i]="i" [attr.aria-pressed]="on" (click)="toggle(o.id)">
+              <span class="spot"></span>
+              <span class="check">✓</span>
+              <span class="ico">{{ o.icon }}</span>
+              <b>{{ o.name }}</b>
+              <small>Option supplémentaire pour votre location.</small>
+              <span class="price">+{{ o.price }}€ <i>/jour</i></span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="block">
+        <h3><span>3</span> Code promo <small>optionnel</small></h3>
+        @if (store.quote()?.promoStatus === 'OK') {
+          <div class="chip-ok">
+            <span class="tick">✓</span>
+            <span><b>{{ store.promo() }}</b> appliqué · −{{ store.quote()?.promoRate }}%</span>
+            <button type="button" (click)="clearPromo()" aria-label="Retirer le code">✕</button>
+          </div>
+        } @else {
+          <div class="promo-row" [class.shake]="promoMessage()">
+            <input placeholder="Code promo" [value]="promoInput()" (input)="promoInput.set($any($event.target).value)"
+                   (keydown.enter)="applyPromo(); $event.preventDefault()">
+            <button type="button" class="apply" [disabled]="!promoInput().trim()" (click)="applyPromo()">Appliquer</button>
+          </div>
+          @if (promoMessage()) { <p class="promo-err">{{ promoMessage() }}</p> }
+          @else if (store.promo() && !store.quote()) { <p class="hint">Le code sera vérifié dès que vos dates sont choisies.</p> }
+        }
+      </section>
+    </div>
+
+    <aside class="summary">
+      <h3>Récapitulatif</h3>
+      @if (store.quote(); as q) {
+        <ul class="sum">
+          <li><span>Voiture · {{ q.days }} j × {{ q.carPerDay }}€</span><b>{{ q.days * q.carPerDay }}€</b></li>
+          @if (q.optionsPerDay > 0) { <li><span>Options · {{ q.days }} j × {{ q.optionsPerDay }}€</span><b>{{ q.days * q.optionsPerDay }}€</b></li> }
+          @if (q.loyaltyRate > 0) { <li class="disc"><span>🏅 Fidélité {{ q.tier }}</span><b>−{{ q.loyaltyRate }}%</b></li> }
+          @if (q.durationRate > 0) { <li class="disc"><span>📆 Long séjour</span><b>−{{ q.durationRate }}%</b></li> }
+          @if (q.promoRate > 0) { <li class="disc"><span>🏷️ Code {{ q.promoCode }}</span><b>−{{ q.promoRate }}%</b></li> }
+          @if (q.loyaltyRate + q.durationRate + q.promoRate > q.totalRate) { <li class="cap"><span>Plafond de remise atteint : {{ q.totalRate }}%</span></li> }
+          @if (q.discount > 0) { <li class="disc"><span>Vous économisez</span><b>−{{ q.discount }}€</b></li> }
+          <li class="total"><span>Total</span>@for (t of [q.total]; track t) { <b class="pop">{{ t }}€</b> }</li>
+        </ul>
+        @if (q.nextTier) { <p class="nudge">🎯 Encore {{ q.rentalsToNext }} location(s) confirmée(s) pour passer {{ q.nextTier }}.</p> }
+      } @else {
+        <p class="hint">Choisissez vos dates pour voir le prix.</p>
+      }
+      @if (error()) { <p class="err">{{ error() }}</p> }
+      <div class="cta">
+        <button class="btn" [disabled]="!canContinue() || sending()" (click)="submit()">{{ sending() ? 'Enregistrement…' : 'Continuer vers les documents' }}</button>
+      </div>
+    </aside>
+  </div>
+}

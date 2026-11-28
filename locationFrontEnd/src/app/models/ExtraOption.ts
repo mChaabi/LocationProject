@@ -1,1 +1,1 @@
-export interface ExtraOption { id: number; icon: string; name: string; price: number; }
+export interface ExtraOption { id: number; icon: string; name: string;description?: string; price: number; }

@@ -39,14 +39,16 @@ public class DataSeeder implements CommandLineRunner {
                     .password(encoder.encode("admin123")).telephone("0600000000").role("admin").build());
         }
         if (extras.count() == 0) {
-            extras.saveAll(List.of(
-                    ExtraOption.builder().icon("...").name("Siège bébé").price(4).build(),
-                    ExtraOption.builder().icon("...").name("2e conducteur").price(8).build(),
-                    ExtraOption.builder().icon("...").name("Assurance premium").price(10).build(),
-                    ExtraOption.builder().icon("...").name("Wi-Fi 4G").price(3).build()
-            ));
+            option("📍", "GPS", "Navigation guidée, sans utiliser vos données mobiles.", 5);
+            option("👶", "Siège bébé", "Siège homologué, installé avant la remise des clés.", 4);
+            option("🧑‍✈️", "2ᵉ conducteur", "Partagez la route avec un second conducteur autorisé.", 8);
+            option("🛡️", "Assurance premium", "Franchise réduite et assistance prioritaire.", 10);
+            option("📶", "Wi-Fi 4G", "Un hotspot dans la voiture pour tous les passagers.", 3);
+            option("🧳", "Galerie de toit", "Plus d’espace pour valises et équipements.", 6);
+            option("♾️", "Kilométrage illimité", "Roulez sans compter, sans frais supplémentaires.", 12);
+            option("❄️", "Chaînes neige", "Équipement hiver pour les routes de montagne.", 4);
         }
-
+        
         if (rules.count() == 0) {
             rules.saveAll(List.of(
                     rule(DiscountRule.Kind.LOYALTY, "Bronze", 1, 5), rule(DiscountRule.Kind.LOYALTY, "Silver", 3, 10),
@@ -56,6 +58,12 @@ public class DataSeeder implements CommandLineRunner {
         if (promos.count() == 0) promos.save(PromoCode.builder().code("BIENVENUE10").percent(10).build());
 
 
+    }
+
+    private void option(String icon, String name, String desc, double price) {
+        extras.findByName(name).ifPresentOrElse(
+                o -> { if (o.getDescription() == null) { o.setDescription(desc); extras.save(o); } },   // never overwrite admin edits
+                () -> extras.save(ExtraOption.builder().icon(icon).name(name).description(desc).price(price).build()));
     }
 
     private Car car(String marque, String modele, String boite, String couleur, int annee, double prix, String img) {

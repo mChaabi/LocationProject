@@ -1,53 +1,55 @@
-<nav class="navbar">
-  <div class="nav-container">
-    <div class="logo">
-      <a routerLink="/home">Auto<span>Drive</span></a>
-    </div>
+<header class="nav" [class.scrolled]="scrolled()">
+  <div class="wrap">
+    <a routerLink="/home" class="logo">Auto<span>Drive</span></a>
 
-    <button class="burger" (click)="toggleMenu()" [class.open]="isMenuOpen">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <ul class="nav-links" [class.active]="isMenuOpen">
-      <li><a routerLink="/home" routerLinkActive="active" (click)="closeMenu()">Accueil</a></li>
-      <li><a routerLink="/cars" routerLinkActive="active" (click)="closeMenu()">Voitures</a></li>
-
-      @if (authService.currentUser()) {
-        <li>
-          <a routerLink="/mes-reservations" routerLinkActive="active" (click)="closeMenu()"
-            >Mes Réservations</a
-          >
-        </li>
+    <nav class="links" aria-label="Navigation principale">
+      @for (l of links; track l.path) {
+        <a [routerLink]="l.path" routerLinkActive="active" class="lnk">{{ l.label }}</a>
       }
-      <li><a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">À propos</a></li>
-      <li>
-        <a routerLink="/mes-documents" routerLinkActive="active" (click)="closeMenu()"
-          >Mes documents</a
-        >
-      </li>
-      <li>
-        <a routerLink="/reservations" routerLinkActive="active" (click)="closeMenu()"
-          >Mes Réservations</a
-        >
-      </li>
-      @if (authService.isAdmin()) {
-        <li><a routerLink="/admin" routerLinkActive="active" (click)="closeMenu()">Admin</a></li>
-      }
-      <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
-      @if (authService.currentUser()) {
-        <li>
-          <button (click)="authService.logout(); closeMenu()" class="btn-logout">
-            Déconnexion
+    </nav>
+
+    <div class="actions">
+      @if (auth.currentUser(); as u) {
+        <div class="user">
+          <button class="avatar-btn" (click)="userOpen.set(!userOpen())" [attr.aria-expanded]="userOpen()">
+            <span class="av">{{ initials() }}</span>
+            <span class="nm">{{ u.prenom }}</span>
+            <span class="chev" [class.up]="userOpen()">▾</span>
           </button>
-        </li>
+          @if (userOpen()) {
+            <div class="menu" role="menu">
+              <div class="who"><b>{{ u.prenom }} {{ u.nom }}</b><small>{{ u.email }}</small></div>
+              @if (auth.isAdmin()) { <a routerLink="/admin" class="mi">📊 Tableau de bord</a> }
+              <a routerLink="/mes-reservations" class="mi">📅 Mes réservations</a>
+              <a routerLink="/mes-documents" class="mi">🪪 Mes documents</a>
+              <button class="mi out" (click)="logout()">↩ Déconnexion</button>
+            </div>
+          }
+        </div>
       } @else {
-        <li>
-          <a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Connexion</a>
-        </li>
-        <li><a routerLink="/register" class="btn-auth" (click)="closeMenu()">Inscription</a></li>
+        <a routerLink="/login" class="login">Connexion</a>
+        <a routerLink="/register" class="cta">Inscription</a>
       }
-    </ul>
+      <button class="burger" [class.open]="menuOpen()" (click)="menuOpen.set(!menuOpen())" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
-</nav>
+</header>
+
+<div class="mobile" [class.open]="menuOpen()" (click)="menuOpen.set(false)">
+  <nav class="panel" (click)="$event.stopPropagation()">
+    @for (l of links; track l.path; let i = $index) {
+      <a [routerLink]="l.path" routerLinkActive="active" [style.--i]="i">{{ l.label }}</a>
+    }
+    @if (auth.currentUser()) {
+      @if (auth.isAdmin()) { <a routerLink="/admin" [style.--i]="4">📊 Tableau de bord</a> }
+      <a routerLink="/mes-reservations" [style.--i]="5">📅 Mes réservations</a>
+      <a routerLink="/mes-documents" [style.--i]="6">🪪 Mes documents</a>
+      <button (click)="logout()" [style.--i]="7">↩ Déconnexion</button>
+    } @else {
+      <a routerLink="/login" [style.--i]="4">Connexion</a>
+      <a routerLink="/register" class="cta" [style.--i]="5">Inscription</a>
+    }
+  </nav>
+</div>

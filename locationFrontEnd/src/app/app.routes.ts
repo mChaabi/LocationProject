@@ -22,6 +22,11 @@ export const routes: Routes = [
   { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
   { path: 'mes-reservations', component: MyReservationsComponent, canActivate: [authGuard] },
   { path: 'reservations', redirectTo: 'mes-reservations' },
+  {
+    path: 'reservation/:carId',
+    loadComponent: () =>
+      import('./features/booking/booking-shell/booking-shell').then((m) => m.BookingShellComponent),
+  },
   { path: 'cars', component: CarListComponent },
   { path: 'cars/:id', component: CarDetailComponent },
   { path: 'mes-documents', component: MyDocumentsComponent, canActivate: [authGuard] },

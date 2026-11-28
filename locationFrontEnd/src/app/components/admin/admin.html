@@ -170,6 +170,7 @@
         <form class="optform" [formGroup]="optForm" (ngSubmit)="addOption()">
           <input formControlName="icon" placeholder="🙂" />
           <input formControlName="name" placeholder="Nom de l'option" />
+          <input formControlName="description" placeholder="Description affichée au client" />
           <input type="number" formControlName="price" placeholder="€ / jour" />
           <button class="btn" [disabled]="optForm.invalid">+ Ajouter</button>
         </form>
@@ -180,6 +181,9 @@
               <div class="grow">
                 <b>{{ o.name }}</b>
               </div>
+              @if (o.description) {
+                <small>{{ o.description }}</small>
+              }
               <b>{{ o.price }}€ /j</b>
               <button class="ghost red" (click)="removeOption(o)">🗑️</button>
             </div>

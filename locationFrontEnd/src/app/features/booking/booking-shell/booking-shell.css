@@ -1,0 +1,57 @@
+:host { display:block; }
+.journey { display:grid; grid-template-columns:320px 1fr; gap:32px; align-items:start; max-width:1240px; margin:0 auto; padding:32px 24px 80px; }
+
+/* Sidebar */
+.side { position:sticky; top:96px; overflow:hidden; border-radius:28px; padding:28px 22px; color:#fff;
+  background:linear-gradient(160deg,#0b1220,#1e1b4b); box-shadow:0 30px 70px rgba(30,27,75,.35); animation:fadeUp .7s var(--ease) backwards; }
+.side::before { content:''; position:absolute; width:320px; height:320px; top:-120px; right:-140px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle,rgba(124,58,237,.55),transparent 70%); animation:drift 12s ease-in-out infinite alternate; }
+@keyframes drift { to { transform:translate(-40px,60px) scale(1.2); } }
+.side-head { position:relative; margin-bottom:22px; } .side-head .kicker { color:#a5b4fc; } .side-head h2 { font-size:1.4rem; }
+
+.steps { --h:76px; position:relative; list-style:none; margin:0; padding:0; }
+.steps::before, .steps::after { content:''; position:absolute; left:20px; top:calc(var(--h) / 2); width:3px; border-radius:3px; }
+.steps::before { height:calc(var(--h) * (var(--n) - 1)); background:rgba(255,255,255,.12); }
+.steps::after { height:calc(var(--h) * (var(--n) - 1) * var(--p)); background:linear-gradient(#818cf8,#c084fc); transition:height .9s var(--ease); }
+
+.step { height:var(--h); animation:slideIn .6s var(--ease) backwards; animation-delay:calc(var(--i) * 90ms); }
+@keyframes slideIn { from { opacity:0; transform:translateX(-24px); } }
+.step button { position:relative; z-index:1; width:100%; height:100%; display:flex; align-items:center; gap:14px; padding:0 10px 0 0;
+  border:0; border-radius:16px; background:none; color:inherit; text-align:left; cursor:pointer; transition:transform .35s var(--ease), background .3s; }
+.node { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:50%; font-size:1.1rem;
+  background:#1e1b4b; border:2px solid rgba(255,255,255,.18); transition:all .4s var(--ease); }
+.txt b { display:block; font-size:.95rem; } .txt small { color:#a5b4fc; font-size:.75rem; }
+.lock { margin-left:auto; font-size:.8rem; }
+
+.step.todo button:hover { transform:translateX(6px); background:rgba(255,255,255,.06); } .step.todo .node { border-color:#818cf8; }
+.step.active button { background:rgba(255,255,255,.1); }
+.step.active .node { background:#fff; border-color:#fff; animation:ring 2s infinite; }
+@keyframes ring { 0% { box-shadow:0 0 0 0 rgba(165,180,252,.6); } 70%, 100% { box-shadow:0 0 0 14px rgba(165,180,252,0); } }
+.step.done .node { background:linear-gradient(135deg,#818cf8,#c084fc); border-color:transparent; font-weight:700; animation:pop .5s var(--ease); }
+@keyframes pop { 0% { transform:scale(.4); } 60% { transform:scale(1.2); } }
+.step.locked, .step.soon { opacity:.45; } .step.locked button, .step.soon button { cursor:not-allowed; }
+
+.pick { position:relative; display:flex; align-items:center; gap:12px; margin-top:22px; padding:14px; border-radius:18px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); animation:fadeUp .6s var(--ease) .4s backwards; }
+.pthumb { flex:none; width:64px; height:48px; border-radius:12px; overflow:hidden; display:grid; place-items:center; font:800 1.4rem 'Inter';
+  background:linear-gradient(135deg,var(--primary),var(--primary-2)); }
+.pthumb img { width:100%; height:100%; object-fit:cover; }
+.pinfo { min-width:0; } .pinfo b { display:block; font-size:.9rem; } .pinfo small { display:block; color:#a5b4fc; font-size:.72rem; }
+.ptotal { margin-left:auto; font:800 1.1rem 'Inter'; animation:pop .45s var(--ease); }
+
+/* Stage */
+.stage { min-width:0; }
+.stage-in { animation:stageIn .55s var(--ease) both; }
+@keyframes stageIn { from { opacity:0; transform:translateX(28px); } }
+
+/* Phone and tablet: the sidebar becomes a sticky progress bar */
+@media (max-width:900px) {
+  .journey { grid-template-columns:1fr; gap:20px; padding:12px 16px 90px; }
+  .side { position:sticky; top:72px; z-index:20; padding:12px 12px; border-radius:20px; }
+  .side-head, .pick, .steps::before, .steps::after { display:none; }
+  .steps { --h:auto; display:flex; gap:4px; }
+  .step { flex:1; height:auto; }
+  .step button { flex-direction:column; gap:6px; padding:6px 2px; text-align:center; }
+  .txt small, .lock { display:none; } .txt b { font-size:.66rem; }
+  .step:not(.active) .txt { opacity:.7; }
+}
